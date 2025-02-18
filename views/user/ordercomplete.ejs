@@ -1,0 +1,26 @@
+<%- include('../layout/user_header.ejs') %>
+<section class="pt-50 pb-150 main-section" style="font-family: Arial, sans-serif;">
+    <div class="section-container" style="max-width: 600px; margin: 0 auto; padding: 20px; background-color: #fff; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); text-align: center;">
+        <h1 style="font-size: 2rem; color: #333; margin-bottom: 20px;">Thank You for Your Order!</h1>
+        <p style="font-size: 1rem; color: #666; margin-bottom: 15px;">Your order has been successfully placed.</p>
+        <p style="font-size: 1rem; color: #666; margin-bottom: 15px;">Order Id:<%= orderdata._id %> <span class="order-number" style="font-weight: bold; color: #000;"></span></p>
+        <p style="font-size: 1rem; color: #666; margin-bottom: 15px;">Expected delivery: Within 3-5 business days</p>
+        <a href="/userDashboard?order=<%= orderdata._id %>" class="success-btn" style="display: inline-block; margin-top: 20px; padding: 10px 20px; font-size: 1rem; color: #fff; background-color: #2874f0; border: none; border-radius: 5px; text-decoration: none; transition: background-color 0.3s;">Track Your Order</a>
+    </div>
+</section>
+
+<div id="preloader-active">
+    <div class="preloader d-flex align-items-center justify-content-center">
+        <div class="preloader-inner position-relative">
+            <div class="text-center">
+                <h5 class="mb-5">Now Loading</h5>
+                <div class="loader">
+                    <div class="bar bar1"></div>
+                    <div class="bar bar2"></div>
+                    <div class="bar bar3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<%- include('../layout/user_footer.ejs') %>

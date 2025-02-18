@@ -1,0 +1,8 @@
+node_modules/
+.env
+test.html
+test2.html
+test3.html
+test4.html
+tempCodeRunnerFile
+.vscode

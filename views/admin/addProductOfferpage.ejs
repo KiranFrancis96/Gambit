@@ -1,0 +1,93 @@
+<%- include('../layout/admin_header.ejs') %>
+
+<div class="container mt-5">
+    <h1 class="mb-4">Add Product Offer</h1>
+    <form id="offerForm" action="/admin/products/addProductOffer/<%= productId %>" method="post">
+        <span class="text-danger"><%= locals.error %></span>
+        <div class="mb-3">
+            <label for="name" class="form-label">Offer Name:</label>
+            <input type="text" id="name" name="name" class="form-control" >
+            <div id="nameError" class="error"></div>
+        </div>
+        <div class="mb-3">
+            <label for="discountPercentage" class="form-label">Discount Percentage:</label>
+            <input type="number" id="discountPercentage" name="discountPercentage" class="form-control" min="1" max="90" >
+            <div id="discountError" class="error"></div>
+        </div>
+        <div class="mb-3">
+            <label for="startDate" class="form-label">Start Date:</label>
+            <input type="date" id="startDate" name="startDate" class="form-control" >
+            <div id="startDateError" class="error"></div>
+        </div>
+        <div class="mb-3">
+            <label for="expiryDate" class="form-label">Expiry Date:</label>
+            <input type="date" id="expiryDate" name="expiryDate" class="form-control" >
+            <div id="expiryDateError" class="error"></div>
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">Description (optional):</label>
+            <textarea id="description" name="description" class="form-control"></textarea>
+        </div>
+        <div class="mb-3">
+            <button type="submit" class="btn btn-primary">Add Offer</button>
+        </div>
+    </form>
+</div>
+
+<style>
+    .error {
+        color: red;
+        font-size: 0.875em; /* Adjust the font size if necessary */
+        margin-top: 5px;
+    }
+</style>
+
+<script>
+    document.getElementById('offerForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        
+        let isValid = true;
+        const now = new Date();
+        
+        // Clear previous errors
+        document.querySelectorAll('.error').forEach(e => e.textContent = '');
+
+        // Name Validation
+        const name = document.getElementById('name').value.trim();
+        if (name === '') {
+            document.getElementById('nameError').textContent = 'Name cannot be empty or just spaces.';
+            isValid = false;
+        }
+
+        // Discount Percentage Validation
+        const discountPercentage = parseInt(document.getElementById('discountPercentage').value, 10);
+        if (isNaN(discountPercentage) || discountPercentage < 1 || discountPercentage > 90) {
+            document.getElementById('discountError').textContent = 'Discount percentage must be between 1 and 90.';
+            isValid = false;
+        }
+
+        // Start Date Validation
+        const startDate = new Date(document.getElementById('startDate').value);
+        if (isNaN(startDate.getTime()) || startDate < now) {
+            document.getElementById('startDateError').textContent = 'Start date cannot be before today.';
+            isValid = false;
+        }
+
+        // Expiry Date Validation
+        const expiryDate = new Date(document.getElementById('expiryDate').value);
+        if (isNaN(expiryDate.getTime()) || expiryDate < now) {
+            document.getElementById('expiryDateError').textContent = 'Expiry date cannot be before today.';
+            isValid = false;
+        } else if (expiryDate < startDate) {
+            document.getElementById('expiryDateError').textContent = 'Expiry date cannot be before the start date.';
+            isValid = false;
+        }
+
+        if (isValid) {
+            // If valid, submit the form
+            this.submit();
+        }
+    });
+</script>
+
+<%- include('../layout/admin_footer.ejs') %>

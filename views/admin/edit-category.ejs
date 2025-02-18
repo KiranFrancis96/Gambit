@@ -1,0 +1,71 @@
+<%- include('../layout/admin_header.ejs') %>
+
+<section class="content-main">
+    <div class="content-header">
+        <h2 class="content-title">Edit Category</h2>
+        <div>
+            <a href="/admin/category" class="btn btn-light rounded btn-sm"><i class="fas fa-arrow-left"></i> Back to categories</a>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <div class="card-body">
+            <form id="editCategoryForm" action="/admin/category/update-category/<%= category._id %>" method="post" enctype="multipart/form-data" class="col-md-8 mx-auto">
+                
+                <div class="mb-4 text-center">
+                    <label for="name" class="form-label">Category Name</label>
+                    <input type="text" name="name" id="name" value="<%= category.name %>" placeholder="Category Name" class="form-control" required>
+                    <div class="invalid-feedback">Please enter a category name.</div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="current-image" class="form-label">Current Image</label>
+                    <img src="/imgs/categories/<%= category.image %>" alt="Current Image" id="current-image" class="img-thumbnail mb-2" style="max-width: 200px;">
+                </div>
+
+                <div class="mb-4">
+                    <label for="image" class="form-label">Upload New Image</label>
+                    <input type="file" name="image" id="image" class="form-control" accept="image/*" onchange="previewImage(event)">
+                    <div class="mt-2">
+                        <img id="image-preview" class="img-thumbnail" style="max-width: 200px; display: none;" alt="Image Preview">
+                    </div>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">Update Category</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<script>
+    document.getElementById('editCategoryForm').addEventListener('submit', function(event) {
+        
+        if (!this.checkValidity()) {
+            event.preventDefault(); 
+            event.stopPropagation(); 
+        }
+        this.classList.add('was-validated'); 
+    });
+
+    function previewImage(event) {
+        const file = event.target.files[0];
+        const preview = document.getElementById('image-preview');
+
+        if (file) {
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            }
+
+            reader.readAsDataURL(file);
+        } else {
+            preview.src = '';
+            preview.style.display = 'none';
+        }
+    }
+</script>
+
+<%- include('../layout/admin_footer.ejs') %>

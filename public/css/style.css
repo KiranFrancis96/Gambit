@@ -1,0 +1,78 @@
+
+/* Centering the search form */
+.form-inline {
+    display: flex;
+    justify-content: center;
+    
+  }
+  /* Icon color */
+  .nav-link i {
+    color: black;
+    margin-left: 15px;
+   
+  }
+  
+  /* Adjust navbar items spacing */
+  .navbar-nav .nav-item {
+    margin-left: 15px;
+  }
+  .carousel-item {
+    position: relative;
+    overflow: hidden;
+    height: 500px; /* Fixed height for the carousel */
+}
+.carousel-item img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%; /* Ensure image covers the container */
+    object-fit: cover; /* Ensure the image covers the container without distortion */
+     transform: translate(-50%, -50%);
+}
+.carousel-caption {
+    bottom: 20px;
+    text-align: center;
+}
+  
+.header-links a{
+    color: black;
+    font-size: medium;
+    font-weight: 500;
+}
+.catdivs{
+    padding: 1.2%;
+}
+.catdivs:hover{
+background-color: white;
+}
+.search-input{
+    width: 300px;
+    background-color: #fff4ec;
+    margin-right: 10px;
+    height: 45px;
+}
+
+
+
+/* search */
+
+
+.search-input {
+    padding-left: 2.5rem; /* Space for the icon */
+}
+.search-input:focus{
+    background-color: white;
+}
+
+.search-icon {
+    /* position: absolute; Position the icon inside the input */
+    position: relative;
+    top: 10px;
+    right: 49px; 
+    color: #6c757d; /* Icon color */
+}
+
+.nav-abouts a{
+    color: #caaa93;
+}

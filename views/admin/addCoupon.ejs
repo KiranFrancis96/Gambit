@@ -1,0 +1,169 @@
+<%- include('../layout/admin_header') %>
+<section class="content-main">
+  <div class="row">
+    <!-- Content Header -->
+    <div class="col-12 mb-3">
+      <div class="content-header">
+        <h2 class="content-title">ADD A NEW COUPON</h2>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-lg-9">
+      <div class="card mb-4">
+        <div class="card-header">
+          <h4>Coupon Details</h4>
+        </div>
+        <div class="card-body">
+          <form method="post" action="/admin/coupons/add-coupon" id="couponForm">
+            <p class="text-danger"><%= locals.error?error :"" %></p>
+            <!-- Coupon Code -->
+            <div class="mb-4">
+              <label for="couponCode" class="form-label">Coupon Code</label>
+              <input type="text" name="couponCode" placeholder="Type here" class="form-control" id="couponCode" oninput="toUpperCase(this)" />
+              <span id="couponCodeError" class="error"></span>
+            </div>
+
+            <!-- Discount Percentage -->
+            <div class="mb-4">
+              <label for="discountPercentage" class="form-label">Discount Percentage</label>
+              <input type="number" name="discountPercentage" placeholder="Percentage" class="form-control" id="discountPercentage" />
+              <span id="discountPercentageError" class="error"></span>
+            </div>
+
+            <!-- Max Amount -->
+            <div class="mb-4">
+              <label for="maxAmount" class="form-label">Maximum Discount Amount</label>
+              <input type="number" name="maxAmount" placeholder="Amount" class="form-control" id="maxAmount" />
+              <span id="maxAmountError" class="error"></span>
+            </div>
+
+            <!-- Min Amount -->
+            <div class="mb-4">
+              <label for="minAmount" class="form-label">Minimum Purchase Amount</label>
+              <input type="number" name="minAmount" placeholder="Amount" class="form-control" id="minAmount" />
+              <span id="minAmountError" class="error"></span>
+            </div>
+
+            <!-- Expiration Date -->
+            <div class="mb-4">
+              <label for="expirationDate" class="form-label">Expiration Date</label>
+              <input type="date" name="expirationDate" class="form-control" id="expirationDate" />
+              <span id="expirationDateError" class="error"></span>
+            </div>
+
+            <!-- Usage Limit -->
+            <div class="mb-4">
+              <label for="usageLimit" class="form-label">Usage Limit</label>
+              <input type="number" name="usageLimit" placeholder="Number of uses" class="form-control" id="usageLimit" />
+              <span id="usageLimitError" class="error"></span>
+            </div>
+
+            <!-- Submit Button -->
+            <div style="display: flex; justify-content: center; padding-top: 15px;">
+              <button class="btn btn-md rounded font-sm hover-up" id="submitForm" type="submit">
+                Add Coupon
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .error {
+    color: red; 
+    font-size: 0.875rem; 
+    display: block; 
+    margin-top: 0.25rem;
+  }
+</style>
+
+<script>
+
+  function toUpperCase(element) {
+    const value  = element.value
+    element.value = value.toUpperCase()
+
+  }
+
+  document.addEventListener("DOMContentLoaded", function() {
+    const form = document.getElementById('couponForm');
+    
+    form.addEventListener('submit', function(event) {
+      let isValid = true;
+
+      // Clear previous errors
+      document.querySelectorAll('.error').forEach(error => error.textContent = '');
+      
+      // Validate Coupon Code
+      const couponCode = document.getElementById('couponCode').value.trim();
+      if (!couponCode) {
+        document.getElementById('couponCodeError').textContent = 'Coupon Code is required.';
+        isValid = false;
+      } else if (!/^[A-Z0-9]+$/.test(couponCode)) {
+        document.getElementById('couponCodeError').textContent = 'Coupon Code must be alphanumeric and uppercase.';
+        isValid = false;
+      }
+
+      // Validate Discount Percentage
+      const discountPercentage = document.getElementById('discountPercentage').value.trim();
+      if (!discountPercentage) {
+        document.getElementById('discountPercentageError').textContent = 'Discount Percentage is required.';
+        isValid = false;
+      } else if (isNaN(discountPercentage) || discountPercentage <= 0) {
+        document.getElementById('discountPercentageError').textContent = 'Discount Percentage must be a positive number.';
+        isValid = false;
+      } else if (discountPercentage > 100) {
+        document.getElementById('discountPercentageError').textContent = 'Discount Percentage cannot exceed 100%.';
+        isValid = false;
+      }
+
+      // Validate Max Amount
+      const maxAmount = document.getElementById('maxAmount').value.trim();
+      if (!maxAmount) {
+        document.getElementById('maxAmountError').textContent = 'Maximum Discount Amount is required.';
+        isValid = false;
+      } else if (isNaN(maxAmount) || maxAmount < 0) {
+        document.getElementById('maxAmountError').textContent = 'Maximum Discount Amount must be a non-negative number.';
+        isValid = false;
+      }
+
+      // Validate Min Amount
+      const minAmount = document.getElementById('minAmount').value.trim();
+      if (!minAmount) {
+        document.getElementById('minAmountError').textContent = 'Minimum Purchase Amount is required.';
+        isValid = false;
+      } else if (isNaN(minAmount) || minAmount < 0) {
+        document.getElementById('minAmountError').textContent = 'Minimum Purchase Amount must be a non-negative number.';
+        isValid = false;
+      }
+
+      // Validate Expiration Date (if provided)
+      const expirationDate = document.getElementById('expirationDate').value.trim();
+      if (expirationDate && new Date(expirationDate) < new Date()) {
+        document.getElementById('expirationDateError').textContent = 'Expiration Date cannot be in the past.';
+        isValid = false;
+      }
+
+      // Validate Usage Limit (if provided)
+      const usageLimit = document.getElementById('usageLimit').value.trim();
+      if (usageLimit && (isNaN(usageLimit) || usageLimit < 0)) {
+        document.getElementById('usageLimitError').textContent = 'Usage Limit must be a non-negative number.';
+        isValid = false;
+      }
+
+      // Prevent form submission if invalid
+      if (!isValid) {
+        event.preventDefault(); 
+      }
+    });
+  });
+</script>
+
+
+
+
+<%- include('../layout/admin_footer.ejs') %>

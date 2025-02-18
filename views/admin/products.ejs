@@ -1,0 +1,120 @@
+<<%- include('../layout/admin_header.ejs') %>
+<section class="content-main">
+    <div class="content-header">
+        <h2 class="content-title">Products</h2>
+        <div>
+            <a href="/admin/products/addproduct" class="btn btn-primary"><i class="material-icons md-plus"></i> Add Product</a>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <header class="card-header">
+            <div class="row gx-3">
+            </div>
+        </header> 
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Product</th>
+                            <th>Category</th>
+                            <th>Status</th>
+                            <th>Price</th>
+                            <th>Offer price</th>
+                            <th>Details</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% products.forEach(product=>{ %>
+                        <tr>
+                            <td><%= product._id %></td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img src="/imgs/products/<%= product.product_images[0] %>" alt="" class="img-xs me-2">
+                                    <span><%= product.product_name %></span>
+                                </div>
+                            </td>
+                            <td><%= product.product_category?.name %></td>
+                            <td>
+                                <% if(product.isActive) {%>
+                                <span class="badge bg-success">Active</span>
+                                <% } %>
+                                <% if(!product.isActive) {%>
+                                <span class="badge bg-danger">Inactive</span>
+                                <% } %>
+                            </td>
+                            <td>₹<%= product.product_sale_price %></td>
+                            <td>₹<%= product.offerPrice || 0.0 %></td>
+                            <td>
+                                <a href="/admin/products/productdetail/<%= product._id %>" class="btn btn-sm btn-outline-primary">Details</a>
+                            </td>
+                            <td class="text-end">
+                                <a href="/admin/products/edit-product/<%= product._id %>" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button class="btn btn-sm <% if(product.isActive) {%> btn-outline-danger <% } %><% if(!product.isActive) {%> btn-outline-success<% } %>" 
+                                        onclick="confirmAction('<%= product._id %>','<%= product.isActive %>')">
+                                    <i <% if(product.isActive) {%>class="fas fa-trash"<% } %> <% if(!product.isActive) {%>class="fas fa-undo"<% } %> ></i>
+                                </button>
+                                <form id="actionForm<%= product._id %>" 
+                                    <% if (product.isActive) { %> action="/admin/products/deactivate-product/<%= product._id %>" 
+                                    method="post" <% } else { %> action="/admin/products/activate-product/<%= product._id %>" method="post" <% } %> style="display: none;">
+                              </form>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="pagination-area mt-15 mb-50">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-start">
+                <% if (currentPage > 1) { %>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=<%= currentPage - 1 %>"><</a>
+                    </li>
+                <% } %>
+                <% for (let i = 1; i <= totalPages; i++) { %>
+                    <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                        <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                    </li>
+                <% } %>
+                <% if (currentPage < totalPages) { %>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=<%= currentPage + 1 %>">></a>
+                    </li>
+                <% } %>
+            </ul>
+        </nav>
+    </div>    
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function confirmAction(productId, isActive) {
+        const action = isActive === 'true' ? 'deactivate' : 'activate';
+        Swal.fire({
+            title: `Are you sure you want to ${action} this product?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'No',
+            customClass: {
+                title: 'swal-title',
+                htmlContainer: 'swal-text',
+                confirmButton: 'swal-confirm-button',
+                cancelButton: 'swal-cancel-button',
+            },
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById(`actionForm${productId}`).submit();
+            }
+        });
+    }
+</script>
+
+<%- include('../layout/admin_footer.ejs') %>

@@ -1,0 +1,212 @@
+<%- include('../layout/admin_header.ejs') %>
+
+<div class="container mt-5">
+    <h1 class="mb-4">Edit Category Offer</h1>
+    <form id="offerForm" action="/admin/categories/editCategoryOffer/<%= category._id %>" method="post">
+        <span class="text-danger"><%= locals.error %></span>
+        <div class="row mb-3">
+            <div class="col-md-9">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Offer Name:</label>
+                    <input type="text" id="name" name="name" class="form-control" value="<%= category?.offer?.name %>">
+                    <div id="nameError" class="error"></div>
+                </div>
+                <div class="mb-3">
+                    <label for="discountPercentage" class="form-label">Discount Percentage:</label>
+                    <input type="number" id="discountPercentage" name="discountPercentage" class="form-control" min="1" max="90" value="<%= category?.offer?.discountPercentage %>">
+                    <div id="discountError" class="error"></div>
+                </div>
+                <div class="mb-3">
+                    <label for="startDate" class="form-label">Start Date:</label>
+                    <input type="date" id="startDate" name="startDate" class="form-control" value="<%= category?.offer?.startDate.toISOString().split('T')[0] %>">
+                    <div id="startDateError" class="error"></div>
+                </div>
+                <div class="mb-3">
+                    <label for="expiryDate" class="form-label">Expiry Date:</label>
+                    <input type="date" id="expiryDate" name="expiryDate" class="form-control" value="<%= category?.offer?.expiryDate.toISOString().split('T')[0] %>">
+                    <div id="expiryDateError" class="error"></div>
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description (optional):</label>
+                    <textarea id="description" name="description" class="form-control"><%= category?.offer?.description || '' %></textarea>
+                </div>
+            </div>
+            <div class="col-md-3 d-flex flex-column align-items-end">
+                <button type="button" id="removeOfferBtn" class="btn btn-danger mb-2">Remove Offer</button>
+                <button type="button" id="toggleStatusBtn" class="btn <% if (category?.offer?.status) { %>btn-warning<% } else { %>btn-success<% } %> mb-2">
+                    <% if (category?.offer?.status) { %>Deactivate Offer<% } else { %>Activate Offer<% } %>
+                </button>
+            </div>
+        </div>
+        <div class="mb-3 ">
+            <button type="submit" class="btn btn-primary">Update Offer</button>
+        </div>
+    </form>
+</div>
+
+<style>
+    .error {
+        color: red;
+        font-size: 0.875em;
+        margin-top: 5px;
+    }
+</style>
+
+<script>
+    document.getElementById('offerForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        
+        let isValid = true;
+        const now = new Date();
+        
+        // Clear previous errors
+        document.querySelectorAll('.error').forEach(e => e.textContent = '');
+    
+        // Name Validation
+        const name = document.getElementById('name').value.trim();
+        if (name === '') {
+            document.getElementById('nameError').textContent = 'Name cannot be empty or just spaces.';
+            isValid = false;
+        }
+    
+        // Discount Percentage Validation
+        const discountPercentage = parseInt(document.getElementById('discountPercentage').value, 10);
+        if (isNaN(discountPercentage) || discountPercentage < 1 || discountPercentage > 90) {
+            document.getElementById('discountError').textContent = 'Discount percentage must be between 1 and 90.';
+            isValid = false;
+        }
+    
+        // Start Date Validation
+        const startDate = new Date(document.getElementById('startDate').value);
+        if (isNaN(startDate.getTime()) || startDate < now) {
+            document.getElementById('startDateError').textContent = 'Start date cannot be before today.';
+            isValid = false;
+        }
+    
+        // Expiry Date Validation
+        const expiryDate = new Date(document.getElementById('expiryDate').value);
+        if (isNaN(expiryDate.getTime()) || expiryDate < now) {
+            document.getElementById('expiryDateError').textContent = 'Expiry date cannot be before today.';
+            isValid = false;
+        } else if (expiryDate < startDate) {
+            document.getElementById('expiryDateError').textContent = 'Expiry date cannot be before the start date.';
+            isValid = false;
+        }
+    
+        if (isValid) {
+            this.submit();
+        }
+    });
+    
+    document.getElementById('removeOfferBtn').addEventListener('click', async function() {
+        const categoryId = '<%= category._id %>';
+        const url = `/admin/categories/removeCategoryOffer/${categoryId}`;
+    
+        try {
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, remove it!'
+            });
+    
+            if (result.isConfirmed) {
+                const response = await fetch(url, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+    
+                const data = await response.json();
+    
+                if (data.success) {
+                    await Swal.fire(
+                        'Removed!',
+                        'The offer has been removed.',
+                        'success'
+                    );
+                    window.location.href = `/admin/category/details/${categoryId}`; 
+                } else {
+                    console.error('Remove offer error:', data);
+                    await Swal.fire(
+                        'Error!',
+                        'Failed to remove the offer. Please try again.',
+                        'error'
+                    );
+                }
+            }
+        } catch (error) {
+            console.error('Fetch error:', error);
+            await Swal.fire(
+                'Error!',
+                'Something went wrong. Please check the console for details.',
+                'error'
+            );
+        }
+    });
+    
+    document.getElementById('toggleStatusBtn').addEventListener('click', async function() {
+        const isActive = <% if (category?.offer?.status) { %>true<% } else { %>false<% } %>
+        const action = isActive ? 'deactivate' : 'activate';
+        const newStatus = !isActive;
+        
+        try {
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                text: `You want to ${action} this offer!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: `Yes, ${action} it!`
+            });
+    
+            if (result.isConfirmed) {
+                const response = await fetch(`/admin/categories/changeCategoryOfferStatus/<%= category._id %>`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+    
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+    
+                const data = await response.json();
+    
+                if (data.success) {
+                    await Swal.fire(
+                        `${action.charAt(0).toUpperCase() + action.slice(1)}d!`,
+                        `The offer has been ${action}d.`,
+                        'success'
+                    );
+                    location.reload()
+                    const toggleStatusBtn = document.getElementById('toggleStatusBtn');
+                    toggleStatusBtn.textContent = newStatus ? 'Deactivate Offer' : 'Activate Offer';
+                    toggleStatusBtn.className = `btn ${newStatus ? 'btn-warning' : 'btn-success'} mb-2`;
+                } else {
+                    await Swal.fire(
+                        'Error!',
+                        'Something went wrong.',
+                        'error'
+                    );
+                }
+            }
+        } catch (error) {
+            console.error('Fetch error:', error);
+            await Swal.fire(
+                'Error!',
+                `Something went wrong. ${error}`,
+                'error'
+            );
+        }
+    });
+</script>
+
+<%- include('../layout/admin_footer.ejs') %>

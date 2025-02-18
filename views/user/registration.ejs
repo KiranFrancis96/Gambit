@@ -1,0 +1,164 @@
+<%- include('../layout/user_header.ejs') %>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="box-shadow p-4 border rounded" style="box-shadow: 3px 3px #ececec; border: 1px solid #e5dcdc;">
+                <div class="heading_s1 text-center mb-4">
+                    <h3>Create an Account</h3>
+                </div>
+                
+                <form id="registration-form" method="post" action="/register">
+                    <div class="form-group">
+                        <input id="name" type="text" class="form-control"  name="name" placeholder="Enter your name">
+                        <span class="error" id="name-error" style="color: red;"></span>
+                    </div>
+                    <div class="form-group">
+                        <input id="email" type="email" class="form-control"  name="email" placeholder="Enter your Email">
+                        <span class="error" id="email-error" style="color: red;"></span>
+                    </div>
+                    <div class="form-group">
+                        <input id="mobile" type="text" class="form-control"  name="mobile" placeholder="Enter your Mobile Number">
+                        <span class="error" id="mobile-error" style="color: red;"></span>
+                    </div>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <input id="password" type="password" class="form-control"  name="password" placeholder="Enter Password">
+                            <span class="input-group-text" onclick="togglePasswordVisibility('password')" style="cursor: pointer;">
+                                <i class="bi bi-eye" id="toggle-icon-password"></i>
+                            </span>
+                        </div>
+                        <span class="error" id="password-error" style="color: red;"></span>
+                    </div>
+                    <div class="form-group">
+                        <div class="input-group">
+                            <input id="cpassword" type="password" class="form-control"  name="cpassword" placeholder="Confirm Password">
+                            <span class="input-group-text" onclick="togglePasswordVisibility('cpassword')" style="cursor: pointer;">
+                                <i class="bi bi-eye" id="toggle-icon-cpassword"></i>
+                            </span>
+                        </div>
+                        <span class="error" id="cpassword-error" style="color: red;"></span>
+                    </div>
+                    <div class="form-group text-center">
+                        <button type="submit" class="btn btn-custom" name="register">Submit & Register</button>
+                    </div>
+                </form>
+
+                <div class="text-center text-muted mt-3">
+                    Already have an account? <a href="/login">Sign in now</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePasswordVisibility(inputId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById('toggle-icon-' + inputId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.replace('bi-eye', 'bi-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.replace('bi-eye-slash', 'bi-eye');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('registration-form');
+        
+        form.addEventListener('submit', function(event) {
+            let isValid = true;
+    
+            clearErrors();
+    
+            const nameElement = document.getElementById('name');
+            if (nameElement) {
+                const name = nameElement.value.trim();
+                if (!name) {
+                    showError('name', 'Name is required');
+                    isValid = false;
+                }
+            }
+    
+            const emailElement = document.getElementById('email');
+            if (emailElement) {
+                const email = emailElement.value.trim();
+                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!email || !emailPattern.test(email)) {
+                    showError('email', 'Please enter a valid email address');
+                    isValid = false;
+                }
+            }
+    
+            const mobileElement = document.getElementById('mobile');
+            if (mobileElement) {
+                const mobile = mobileElement.value.trim();
+                const mobilePattern = /^\d{10}$/;
+                if (!mobile || !mobilePattern.test(mobile)) {
+                    showError('mobile', 'Mobile number must be 10 digits');
+                    isValid = false;
+                }
+            }
+    
+            const passwordElement = document.getElementById('password');
+            if (passwordElement) {
+                const password = passwordElement.value.trim();
+                if (!validateStrongPassword(password)) {
+                    showError('password', 'Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a digit, and a special character.');
+                    isValid = false;
+                }
+            }
+    
+
+            const cpasswordElement = document.getElementById('cpassword');
+            const password = document.getElementById('password').value.trim();
+            if (cpasswordElement) {
+                const cpassword = cpasswordElement.value.trim();
+                if (cpassword !== password) {
+                    showError('cpassword', 'Passwords do not match');
+                    isValid = false;
+                }
+            }
+    
+
+            if (!isValid) {
+                event.preventDefault();
+            } else {
+
+                Swal.fire({
+                    title: 'Processing...',
+                    text: 'Please wait while we create your account.',
+                    icon: 'info',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+            }
+        });
+    
+        function validateStrongPassword(password) {
+            const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
+            return passwordPattern.test(password);
+        }
+    
+        function showError(fieldId, message) {
+            const errorElement = document.getElementById(`${fieldId}-error`);
+            if (errorElement) {
+                errorElement.textContent = message;
+            }
+        }
+    
+        function clearErrors() {
+            const errorElements = document.querySelectorAll('.error');
+            errorElements.forEach(element => {
+                element.textContent = '';
+            });
+        }
+    });
+</script>
+
+    
+<%- include('../layout/user_footer.ejs') %>

@@ -1,0 +1,1423 @@
+<%- include('../layout/user_header.ejs') %>
+<main class="main">
+    <div class="page-header breadcrumb-wrap">
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="/" rel="nofollow">Home</a>
+                <span></span> Account
+            </div>
+        </div>
+    </div>
+    <section class="pt-150 pb-150">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-10 m-auto">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="dashboard-menu">
+                                <ul class="nav flex-column" role="tablist">
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="dashboard-tab" data-bs-toggle="tab" href="#dashboard" role="tab" aria-controls="dashboard" aria-selected="false">
+                                            <i class="fi-rs-settings-sliders mr-10"></i>Dashboard
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="orders-tab" data-bs-toggle="tab" href="#orders" role="tab" aria-controls="orders" aria-selected="false">
+                                            <i class="fi-rs-shopping-bag mr-10"></i>Orders
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="address-tab" data-bs-toggle="tab" href="#address" role="tab" aria-controls="address" aria-selected="false">
+                                            <i class="fi-rs-marker mr-10"></i>My Address
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="account-detail-tab" data-bs-toggle="tab" href="#account-detail" role="tab" aria-controls="account-detail" aria-selected="false">
+                                            <i class="fi-rs-user mr-10"></i>Account details
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="wallet-tab" data-bs-toggle="tab" href="#wallet" role="tab" aria-controls="wallet" aria-selected="false">
+                                            <i class="fi-rs-user mr-10"></i>Wallet
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="/logout" onclick="localStorage.removeItem('activeTab')">
+                                            <i class="/userDashboardfi-rs-sign-out mr-10"></i>Logout
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="tab-content dashboard-content">
+                                <div class="tab-pane fade" id="dashboard" role="tabpanel" aria-labelledby="dashboard-tab">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="mb-0">Hello <%= user.name %>! </h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>From your account dashboard, you can easily check &amp; view your <a href="#">recent orders</a>, manage your <a href="#">shipping and billing addresses</a>, and <a href="#">edit your password and account details.</a></p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="orders" role="tabpanel" aria-labelledby="orders-tab">
+                                    <% if (orderData && orderData.length > 0) { %>
+                                        <% orderData.forEach(order => { %>
+                                            <div class="order-card card mb-3" style="border-radius: 10px;" data-order-id="<%= order._id %>">
+                                                <div class="card-body">
+                                                    <div class="d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#orderDetails-<%= order._id %>">
+                                                        <div>
+                                                            <p class="mb-1"><strong>Order Number:</strong> #<%= order._id %></p>
+                                                            <p class="mb-1"><strong>Total:</strong> Rs <%= order.totalAmount %></p>
+                                                            <p class="mb-1"><strong>Order Date:</strong> <%= new Date(order.orderDate).toLocaleDateString() %></p>
+                                                            <p class="mb-1"><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
+                                                        </div>
+                                                        <div id="orderStatus<%= order._id %>" class="text-warning">
+                                                            <strong><%= order.orderStatus.toUpperCase() %></strong>
+                                                        </div>
+                                                    </div>
+                                                    <div id="orderDetails-<%= order._id %>" class="collapse">
+                                                        <hr>
+                                                        <div class="mb-3">
+                                                            <p class="mb-1">Ship To: <%= order.shippingAddress.fullname %></p>
+                                                            <p class="mb-1" style="margin-left: 55px;"><%= order.shippingAddress.Address %></p>
+                                                            <p class="mb-1" style="margin-left: 55px;"><%= order.shippingAddress.city %>, <%= order.shippingAddress.state %></p>
+                                                            <p class="mb-1" style="margin-left: 55px;">Pincode: <%= order.shippingAddress.pincode %></p>
+                                                        </div>
+                                
+                                                        <% order.items.forEach(item => { %>
+                                                            <div class="d-flex mb-3">
+                                                                <div class="flex-shrink-0 me-3" style="width: 50px;">
+                                                                    <% if (item.images && item.images.length > 0) { %>
+                                                                        <img src="/imgs/products/<%= item.images[0] %>" alt="Product Image" class="img-fluid">
+                                                                    <% } else { %>
+                                                                        <span>No image</span>
+                                                                    <% } %>
+                                                                </div>
+                                                                <div class="flex-grow-1">
+                                                                    <p class="mb-1"><strong>Name:</strong> <%= item.productName %></p>
+                                                                    <p class="mb-1"><strong>Brand:</strong> <%= item.brandName %></p>
+                                                                    <p class="mb-0"><strong>Price:</strong> Rs <%= item.itemOffer?.offerAmount ? (item.price - item.itemOffer.offerAmount) * item.quantity : item.price * item.quantity %></p>
+                                                                    <p class="mb-0"><strong>Quantity:</strong> x <%= item.quantity %></p>
+                                                                    <p id="itemOrderStatus<%= item._id %>" class="order-product-status mb-0 text-warning">
+                                                                        <strong>Status: <%= item.itemOrderStatus.toUpperCase() %></strong>
+                                                                    </p>
+                                                                </div>
+                                
+                                                                <div>
+                                                                    <% if (order.paymentStatus === 'failed') { %>
+                                                                        <a href="/retryPayment/<%= order._id %>" id="retryPaymentButton<%= item._id %>" class="btn btn-primary btn-sm">
+                                                                            Retry Payment
+                                                                        </a>
+                                                                    <% } else { %>
+                                                                        <% const canCancel = item.itemOrderStatus !== 'delivered' && item.itemOrderStatus !== 'shipped'; %>
+                                                                        <% const canReturn = item.itemOrderStatus === 'delivered' || item.itemOrderStatus === 'shipped'; %>
+                                                                        <% const isReturnInitiated = ['returnInitiated', 'returnApproved', 'returnRejected'].includes(item.itemOrderStatus); %>
+                                                                        
+                                                                        <% if (isReturnInitiated) { %>
+                                                                            <button id="cancelProductButton<%= item._id %>" class="btn btn-sm individualCancel" disabled>
+                                                                                Return
+                                                                            </button>
+                                                                        <% } else if (order.paymentMethod === 'COD' && canCancel) { %>
+                                                                            <button disabled class="btn btn-sm individualCancel">Cancel</button> 
+                                                                        <% } else if (canCancel) { %>
+                                                                            <button id="cancelProductButton<%= item._id %>" class="btn btn-sm individualCancel" 
+                                                                                onclick="cancelOrderItem('<%= item._id %>', '<%= order._id %>', '<%= item.itemOrderStatus %>')"
+                                                                                <%= item.itemOrderStatus === 'cancelled' ? 'disabled' : '' %>>
+                                                                                <%= item.itemOrderStatus === 'cancelled' ? 'Cancelled' : 'Cancel' %>
+                                                                            </button>
+                                                                        <% } %>
+                                
+                                                                        <% if (canReturn) { %>
+                                                                            <button id="returnProductButton<%= item._id %>" class="btn btn-primary btn-sm" 
+                                                                                onclick="returnProduct('<%= item._id %>', '<%= item.product %>', '<%= order._id %>', '<%= item.itemOrderStatus %>')"
+                                                                                <%= isReturnInitiated ? 'disabled' : '' %>>
+                                                                                Return
+                                                                            </button>
+                                                                        <% } %>
+                                                                    <% } %>
+                                                                </div>
+                                                            </div>
+                                                        <% }); %>
+                                
+                                                        <div class="mb-3">
+                                                            <p class="mb-1"><strong>Subtotal:</strong> Rs <%= order.subTotalAmount %></p>
+                                                            <p class="mb-1"><strong>Coupon Discount:</strong> Rs <%= order.couponDiscount %></p>
+                                                            <p class="mb-1"><strong>Offer Discount:</strong> Rs <%= order.offerDiscount %></p>
+                                                            <p class="mb-1"><strong>Total:</strong> Rs <%= order.totalAmount %></p>
+                                                            <p class="mb-1"><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
+                                                            <% if (order.orderStatus === 'delivered') { %>
+                                                                <p class="mb-1">
+                                                                    <button onclick="downloadInvoice(event, '<%= order._id %>')" class="btn btn-sm btn-outline-primary">
+                                                                        <strong><i class="bi bi-file-earmark-arrow-down-fill"></i> Download Invoice</strong>
+                                                                    </button>
+                                                                </p>
+                                                            <% } %>
+                                                        </div>
+                                                        <div class="text-end">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <% }); %>
+                                    <% } else { %>
+                                        <p>No orders found.</p>
+                                    <% } %>
+                                </div>                                
+                                <div class="tab-pane fade" id="address" role="tabpanel" aria-labelledby="address-tab">
+                                    <div class="d-flex justify-content-end mb-3">
+                                        <button class="btn btn-primary" data-bs-toggle="collapse" data-bs-target="#add-address-form">Add New Address</button>
+                                    </div>
+                                    <div id="add-address-form" class="collapse">
+                                        <form method="post" action="/add-address/<%= user._id %>" >
+                                            
+                                            <div class="row">
+                                                <div class="form-group col-md-12">
+                                                    <label>Name <span class="required">*</span></label>
+                                                    <input required="" class="form-control square" name="name" type="text" placeholder="Enter name">
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label>Phone <span class="required">*</span></label>
+                                                    <input required="" class="form-control square" name="phone" type="text" placeholder="Enter phone number">
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label>Alternative Phone</label>
+                                                    <input class="form-control square" name="alt_phone" type="text" placeholder="Enter alternative phone number">
+                                                </div>
+                                                <div class="form-group col-md-12">
+                                                    <label>Address <span class="required">*</span></label>
+                                                    <input required="" class="form-control square" name="Address" type="text" placeholder="Enter address">
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label>City <span class="required">*</span></label>
+                                                    <input required="" class="form-control square" name="city" type="text" placeholder="Enter city">
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label>State/Province <span class="required">*</span></label>
+                                                    <select required="" class="form-control square" name="state">
+                                                        <option value="Andhra Pradesh">Andhra Pradesh</option>
+                                                        <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                                                        <option value="Assam">Assam</option>
+                                                        <option value="Bihar">Bihar</option>
+                                                        <option value="Chhattisgarh">Chhattisgarh</option>
+                                                        <option value="Goa">Goa</option>
+                                                        <option value="Gujarat">Gujarat</option>
+                                                        <option value="Haryana">Haryana</option>
+                                                        <option value="Himachal Pradesh">Himachal Pradesh</option>
+                                                        <option value="Jharkhand">Jharkhand</option>
+                                                        <option value="Karnataka">Karnataka</option>
+                                                        <option value="Kerala">Kerala</option>
+                                                        <option value="Madhya Pradesh">Madhya Pradesh</option>
+                                                        <option value="Maharashtra">Maharashtra</option>
+                                                        <option value="Manipur">Manipur</option>
+                                                        <option value="Meghalaya">Meghalaya</option>
+                                                        <option value="Mizoram">Mizoram</option>
+                                                        <option value="Nagaland">Nagaland</option>
+                                                        <option value="Odisha">Odisha</option>
+                                                        <option value="Punjab">Punjab</option>
+                                                        <option value="Rajasthan">Rajasthan</option>
+                                                        <option value="Sikkim">Sikkim</option>
+                                                        <option value="Tamil Nadu">Tamil Nadu</option>
+                                                        <option value="Telangana">Telangana</option>
+                                                        <option value="Tripura">Tripura</option>
+                                                        <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                                        <option value="Uttarakhand">Uttarakhand</option>
+                                                        <option value="West Bengal">West Bengal</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label>Pincode <span class="required">*</span></label>
+                                                    <input required="" class="form-control square" name="pincode" type="text" placeholder="Enter pincode">
+                                                </div>
+                                                <div class="form-group col-md-12">
+                                                    <button type="submit" class="btn btn-fill-out submit" name="submit" value="Submit">Save Address</button>
+                                                    <button type="button" class="btn btn-secondary ms-2" data-bs-toggle="collapse" data-bs-target="#add-address-form">Cancel</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="list-group mt-3">
+
+                                        <% user.address.forEach((address, index) => { %>
+                                        <div class="list-group-item">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <% if(address.primary ) { %>
+                                                    <span style="padding: 2%; background-color: grey;">primary</span>
+                                                    <% } %>
+                                                    <strong><%= address.fullname %> <%= address.mobile %></strong>
+                                                    <p><%= address.Address %>, <%= address.city %>, <%= address.state %></p>
+                                                </div>
+                                                <div>
+
+                                                    <button class="btn p-0" type="button" style="background-color: rgba(0, 0, 0, 0.126);" data-bs-toggle="dropdown" aria-expanded="false">
+                                                        <i class="bi bi-three-dots-vertical"></i>
+                                                    </button>
+                                                    <ul class="dropdown-menu">
+                                                        <li>
+                                                            <a class="dropdown-item" href="#" data-bs-toggle="collapse" data-bs-target="#edit-address-<%= index %>">Edit</a>
+                                                        </li>
+                                                        <% if(user.address.length>1) {%>
+                                                        <li>
+                                                            <a class="dropdown-item" href="#" onclick="confirmDelete('<%= address._id %>')">Delete</a>
+                                                        </li>
+                                                        <% } %>
+                                                    </ul>
+                                                </div>
+                                                                                                
+                                            </div>
+                                            <div id="edit-address-<%= index %>" class="collapse mt-3">
+                                                <form method="post" action="/update-address/<%= address._id %>">
+                                                    
+                                                    <div class="row">
+                                                        <div class="form-group col-md-12">
+                                                            <label>Name <span class="required">*</span></label>
+                                                            <input  class="form-control square" name="name" type="text" value="<%= address.fullname %>" placeholder="<%= address.fullname %>">
+                                                        </div>
+                                                        <div class="form-group col-md-6">
+                                                            <label>Phone <span class="required">*</span></label>
+                                                            <input  class="form-control square" name="phone" type="text" value="<%= address.mobile %>" placeholder="<%= address.mobile %>">
+                                                        </div>
+                                                        <div class="form-group col-md-6">
+                                                            <label>Alternative Phone</label>
+                                                            <input class="form-control square" name="alt_phone" type="text" value="<%= address.altMobile %>" placeholder="<%= address.altMobile %>">
+                                                        </div>
+                                                        <div class="form-group col-md-12">
+                                                            <label>Address <span class="required">*</span></label>
+                                                            <input  class="form-control square" name="address" type="text" value="<%= address.Address %>" placeholder="<%= address.Address %>">
+                                                        </div>
+                                                        <div class="form-group col-md-6">
+                                                            <label>City <span class="required">*</span></label>
+                                                            <input  class="form-control square" name="city" type="text" value="<%= address.city %>" placeholder="<%= address.city %>">
+                                                        </div>
+                                                        <div class="form-group col-md-6">
+                                                            <label>State <span class="required">*</span></label>
+                                                            <select class="form-control square" name="state">
+                                                                <option value="Andhra Pradesh" <%= address.state === 'Andhra Pradesh' ? 'selected' : '' %>>Andhra Pradesh</option>
+                                                                <option value="Arunachal Pradesh" <%= address.state === 'Arunachal Pradesh' ? 'selected' : '' %>>Arunachal Pradesh</option>
+                                                                <option value="Assam" <%= address.state === 'Assam' ? 'selected' : '' %>>Assam</option>
+                                                                <option value="Bihar" <%= address.state === 'Bihar' ? 'selected' : '' %>>Bihar</option>
+                                                                <option value="Chhattisgarh" <%= address.state === 'Chhattisgarh' ? 'selected' : '' %>>Chhattisgarh</option>
+                                                                <option value="Goa" <%= address.state === 'Goa' ? 'selected' : '' %>>Goa</option>
+                                                                <option value="Gujarat" <%= address.state === 'Gujarat' ? 'selected' : '' %>>Gujarat</option>
+                                                                <option value="Haryana" <%= address.state === 'Haryana' ? 'selected' : '' %>>Haryana</option>
+                                                                <option value="Himachal Pradesh" <%= address.state === 'Himachal Pradesh' ? 'selected' : '' %>>Himachal Pradesh</option>
+                                                                <option value="Jharkhand" <%= address.state === 'Jharkhand' ? 'selected' : '' %>>Jharkhand</option>
+                                                                <option value="Karnataka" <%= address.state === 'Karnataka' ? 'selected' : '' %>>Karnataka</option>
+                                                                <option value="Kerala" <%= address.state === 'Kerala' ? 'selected' : '' %>>Kerala</option>
+                                                                <option value="Madhya Pradesh" <%= address.state === 'Madhya Pradesh' ? 'selected' : '' %>>Madhya Pradesh</option>
+                                                                <option value="Maharashtra" <%= address.state === 'Maharashtra' ? 'selected' : '' %>>Maharashtra</option>
+                                                                <option value="Manipur" <%= address.state === 'Manipur' ? 'selected' : '' %>>Manipur</option>
+                                                                <option value="Meghalaya" <%= address.state === 'Meghalaya' ? 'selected' : '' %>>Meghalaya</option>
+                                                                <option value="Mizoram" <%= address.state === 'Mizoram' ? 'selected' : '' %>>Mizoram</option>
+                                                                <option value="Nagaland" <%= address.state === 'Nagaland' ? 'selected' : '' %>>Nagaland</option>
+                                                                <option value="Odisha" <%= address.state === 'Odisha' ? 'selected' : '' %>>Odisha</option>
+                                                                <option value="Punjab" <%= address.state === 'Punjab' ? 'selected' : '' %>>Punjab</option>
+                                                                <option value="Rajasthan" <%= address.state === 'Rajasthan' ? 'selected' : '' %>>Rajasthan</option>
+                                                                <option value="Sikkim" <%= address.state === 'Sikkim' ? 'selected' : '' %>>Sikkim</option>
+                                                                <option value="Tamil Nadu" <%= address.state === 'Tamil Nadu' ? 'selected' : '' %>>Tamil Nadu</option>
+                                                                <option value="Telangana" <%= address.state === 'Telangana' ? 'selected' : '' %>>Telangana</option>
+                                                                <option value="Tripura" <%= address.state === 'Tripura' ? 'selected' : '' %>>Tripura</option>
+                                                                <option value="Uttar Pradesh" <%= address.state === 'Uttar Pradesh' ? 'selected' : '' %>>Uttar Pradesh</option>
+                                                                <option value="Uttarakhand" <%= address.state === 'Uttarakhand' ? 'selected' : '' %>>Uttarakhand</option>
+                                                                <option value="West Bengal" <%= address.state === 'West Bengal' ? 'selected' : '' %>>West Bengal</option>
+                                                            </select>
+                                                        </div>
+                                                        
+                                                        <div class="form-group col-md-6">
+                                                            <label>Pincode <span class="required">*</span></label>
+                                                            <input  class="form-control square" name="pincode" type="text" value="<%= address.pincode %>" placeholder="Enter pincode">
+                                                        </div>
+                                                        
+                                                        <div class="form-group col-md-12">
+                                                            <button type="submit" class="btn btn-fill-out submit" name="submit" value="Submit">Update Address</button>
+                                                            <button type="button" class="btn btn-secondary ms-2" data-bs-toggle="collapse" data-bs-target="#edit-address-<%= index %>">Cancel</button>
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <% }) %>    
+                                    </div>
+                                    
+                                   
+                                </div>
+                                <div class="tab-pane fade" id="account-detail" role="tabpanel" aria-labelledby="account-detail-tab">
+                                    
+                                    <div class="card">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h5>Personal Information</h5>
+ 
+                                            <span class="edit-link text-primary" onclick="toggleEditMode('personal-info')" style="cursor: pointer;">Edit</span>
+                                        </div>
+                                    
+
+                                        <div class="card-body" id="personal-info-view">
+                                            <p><strong>User Name:</strong> <%= user.name %></p>
+                                            <p><strong>Mobile:</strong> <%= user.mobile %></p>
+                                        </div>
+                                    
+
+                                        <div class="card-body" id="personal-info-edit" style="display: none;">
+                                            <form method="post" id="personal-info-form" onsubmit="editPersonaldetails(event)">
+                                                <div class="row">
+
+                                                    <div class="form-group col-md-6">
+                                                        <label for="name">User Name</label>
+                                                        <input id="name" class="form-control" name="name" type="text" value="<%= user.name %>" required />
+                                                        <span id="username-error" class="error-message"></span>
+                                                    </div>
+                                    
+
+                                                    <div class="form-group col-md-6">
+                                                        <label for="mobile">Mobile Number</label>
+                                                        <input id="mobile" class="form-control" name="mobile" type="text" value="<%= user.mobile %>" pattern="^(?:(?:\+91|91)?[6789]\d{9})$" required  />
+                                                        <span id="mobile-error" class="error-message"></span>
+                                                    </div>
+                                    
+
+                                                    <div class="form-group col-md-12 d-flex justify-content-end">
+                                                        <button type="button" class="btn btn-secondary btn-sm me-2" onclick="toggleEditMode('personal-info')">Cancel</button>
+                                                        <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    
+
+                                    <div class="card mt-4">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h5>Change Email</h5>
+
+                                            <span class="edit-link text-primary" onclick="toggleEditMode('change-email')" style="cursor: pointer;">Edit</span>
+                                        </div>
+                                    
+
+                                        <div class="card-body" id="change-email-view">
+                                            <p><strong>Email:</strong> <%= user.email %></p>
+                                        </div>
+                                    
+
+                                        <div class="card-body" id="change-email-edit" style="display: none;">
+                                            <form method="post" id="change-email-form" onsubmit="changeEmail(event)">
+                                                <div class="row">
+ 
+                                                    <div class="form-group col-md-6">
+                                                        <label for="current-email">Current Email</label>
+                                                        <input id="current-email" class="form-control" name="currentEmail" type="email" value="<%= user.email %>" readonly />
+                                                    </div>
+                                                    <% if(!user.googleId) {%>
+ 
+                                                    <div class="form-group col-md-6">
+                                                        <label for="new-email">New Email</label>
+                                                        <input id="new-email" class="form-control" name="newEmail" type="email" required />
+                                                        <span id="new-email-error" class="error-message"></span>
+                                                    </div>
+                                    
+
+                                                    <div class="form-group col-md-6">
+                                                        <label for="confirm-new-email">Confirm New Email</label>
+                                                        <input id="confirm-new-email" class="form-control" name="confirmNewEmail" type="email" required />
+                                                        <span id="confirm-new-email-error" class="error-message"></span>
+                                                    </div>
+                                                    <% } %>
+
+                                                    <div class="form-group col-md-12 d-flex justify-content-end">
+                                                        <button type="button" class="btn btn-secondary btn-sm me-2" onclick="toggleEditMode('change-email')">Cancel</button>
+                                                        <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>            
+                                                            
+                                    <% if(!user.googleId) {%>
+                                    <div class="card mt-4">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h5>Change Password</h5>
+
+                                            <span class="edit-link text-primary" onclick="toggleEditMode('change-password')" style="cursor: pointer;">Edit</span>
+                                        </div>
+                                
+
+                                        <div class="card-body" id="change-password-edit" style="display: none;">
+                                            <form method="post" id="change-password-form" onsubmit="changePassword(event)">
+                                                <div class="row">
+
+                                                    <div class="form-group col-md-6">
+                                                        <label for="current-password">Current Password</label>
+                                                        <input id="current-password" class="form-control" name="currentPass" type="password" required />
+                                                        <span id="current-password-error" class="error-message"></span>
+                                                    </div>
+                                
+
+                                                    <div class="form-group col-md-6">
+                                                        <label for="new-password">New Password</label>
+                                                        <input id="new-password" class="form-control" name="newPass" type="password" required />
+                                                        <span id="new-password-error" class="error-message"></span>
+                                                    </div>
+                                
+
+                                                    <div class="form-group col-md-6">
+                                                        <label for="confirm-new-password">Confirm New Password</label>
+                                                        <input id="confirm-new-password" class="form-control" name="confirmNewPass" type="password" required />
+                                                        <span id="confirm-new-password-error" class="error-message"></span>
+                                                    </div>
+                                
+                                                    
+                                                    <div class="form-group col-md-12 d-flex justify-content-end">
+                                                        <button type="button" class="btn btn-secondary btn-sm me-2" onclick="toggleEditMode('change-password')">Cancel</button>
+                                                        <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <% } %>
+                                </div>
+
+                                <div class="tab-pane fade" id="wallet" role="tabpanel" aria-labelledby="wallet-tab">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h2>Your Wallet</h2>
+                                        </div>
+                                        <div class="card-body">
+                                            
+                            <div class="container mt-4">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <h5 class="card-title">Wallet Balance</h5>
+                                                <h2 class="card-text text-primary" id="walletTotalBalance">₹ <%= wallet?.balance || '0' %> </h2> <a onclick="walletAddMoney(event,'<%= user._id %>')" class="btn btn-primary btn-sm">Add Money</a>
+                                            </div>
+                                        </div>
+                        
+                                        <table class="table table-striped mt-4">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">Payment ID</th>
+                                                    <th scope="col">Amount</th>
+                                                    <th scope="col">Date</th>
+                                                    <th scope="col">Type</th>
+                                                    <th scope="col">Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                              <% if(wallet?.transactions.length>0 && wallet) {%>
+                                                <% wallet.transactions.forEach(transaction => { %>
+                                                        <tr>
+                                                            <td><%= transaction.razorpaymentId %></td>
+                                                            <td>₹<%= transaction.amount %></td>
+                                                            <td><%= transaction.createdAt.toISOString().split('T')[0] %></td>
+                                                            <td><span style="color:<%= transaction.type=='credit'?'green':'red' %> ;"><%= transaction.type %></span></td>
+                                                            <td><span style="color:<%= transaction.status=='success'?'green':'red' %> ;"><%= transaction.status %></span></td>
+                                                        </tr>
+                                                        <% }) %>
+                                                  <% }else {%> 
+                                                    <tr>
+                                                        <td colspan="5" class="text-center">No transactions available</td>
+                                                    </tr>
+                                                  <% } %>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                 </div> 
+              </div>
+            </div>
+        </div>
+    </div>
+</section>
+</main>
+
+<style>
+   
+.form-check {
+    margin-bottom: 10px;
+}
+
+
+.form-check-label {
+    margin-left: 5px;
+    vertical-align: middle;
+}
+
+
+.form-check-input {
+    margin-right: 5px; 
+}
+/* Style for the Edit and Cancel links */
+.edit-link {
+    font-weight: 500;
+    font-size: 0.9rem;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.edit-link:hover {
+    text-decoration: none;
+}
+
+/* Customizing form controls */
+.form-control {
+    border-radius: 4px;
+    border-color: #ced4da;
+}
+
+/* Adding padding to the card */
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Alignment for buttons */
+.form-group .btn {
+    border-radius: 4px;
+}
+
+/* Space between buttons */
+.btn-secondary.me-2 {
+    margin-right: 0.5rem;
+}
+.error {
+    border-color: red;
+}
+.error-message {
+    color: red;
+    font-size: 0.875em;
+}
+
+
+</style>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+
+    async function downloadInvoice(event,orderId){
+        event.preventDefault()
+        event.stopPropagation();
+        try{
+            window.location.href = `/order/downloadInvoice/${orderId}`
+        }catch(err){
+            console.log(err)
+            swal.fire('error!',err.message || 'An error Occcured while downloading the invoice','error')
+        }
+    }
+    async function walletAddMoney(event, userId) {
+        event.preventDefault();
+    
+        const { value: amount } = await Swal.fire({
+            title: 'Add Money to Wallet',
+            input: 'number',
+            inputLabel: 'Enter amount',
+            inputPlaceholder: 'Enter amount to be added',
+            inputAttributes: {
+                min: 1,
+                step: 1
+            },
+            confirmButtonText: 'Add',
+            showCancelButton: true,
+            cancelButtonText: 'Cancel',
+            inputValidator: (value) => {
+                if (!value || isNaN(value) || value <= 0) {
+                    return 'Please enter a valid positive amount!';
+                } else if (value < 100) {
+                    return 'Minimum amount to be added is 100';
+                }
+            }
+        });
+    
+        if (amount === undefined) {
+            return;
+        }
+    
+        try {
+            Swal.fire({
+                title: 'Processing Payment...',
+                text: 'Please wait while we process your payment.',
+                diOpen: () => {
+                    Swal.showLoading();
+                },
+                allowOutsideClick: false,
+                showConfirmButton: false
+            });
+    
+            const response = await fetch('/razorpay/createOrder', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, amount })
+            });
+    
+            if (!response.ok) {
+                throw new Error(`Server Error: ${response.statusText}`);
+            }
+    
+            const data = await response.json();
+    
+            if (!data || !data.success) {
+                throw new Error(data?.message || 'Failed to create order');
+            }
+    
+            const options = {
+                key: data.key,
+                amount: data.order.amount,
+                currency: 'INR',
+                name: 'GAMBIT',
+                description: 'Add Money to Wallet',
+                order_id: data.order.id,
+                handler: async function (response) {
+                    try {
+                        const verificationResponse = await fetch('/razorpay/verify-payment', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                order_id: response.razorpay_order_id,
+                                payment_id: response.razorpay_payment_id,
+                                signature: response.razorpay_signature
+                            })
+                        });
+    
+                        if (!verificationResponse.ok) {
+                            throw new Error(`Server Error: ${verificationResponse.statusText}`);
+                        }
+    
+                        const verificationData = await verificationResponse.json();
+    
+                        if (!verificationData || !verificationData.success) {
+                            throw new Error(verificationData?.message || 'Payment verification failed');
+                        }
+    
+                        const handledResponse = await handlePayment(data.order.amount, userId, response.razorpay_order_id, response.razorpay_payment_id, verificationData.success);
+                        
+                        if (!handledResponse.success) {
+                            return Swal.fire('Error!', handledResponse.message || 'An error occurred', 'error');
+                        }
+                        document.getElementById('walletTotalBalance').textContent = handledResponse.amount;
+                        return Swal.fire('Success!', handledResponse.message || 'Money added to wallet successfully!', 'success');
+                        
+                    } catch (error) {
+                        Swal.fire('Error!', error.message || 'An error occurred while verifying payment.', 'error');
+                    }
+                },
+                prefill: {
+                    name: '<%= user.name %>',
+                    email: '<%= user.email %>',
+                    contact: '<%= user.mobile %>'
+                },
+                theme: {
+                    color: '#674188'
+                }
+            };
+    
+            const rzp1 = new Razorpay(options);
+            rzp1.on('payment.failed', async function (res) {
+                try {
+                    const { payment_id, order_id } = res.error.metadata;
+
+                    if (!payment_id || !order_id) {
+                        throw new Error('Missing payment ID or order ID in the failure response.');
+                    }
+                    
+                    const handledResponse = await handlePayment(
+                        data.order.amount, 
+                        userId, 
+                        order_id, 
+                        payment_id, 
+                        false
+                    );
+    
+                    if (handledResponse.success) {
+                        return Swal.fire('Error!', handledResponse.message || 'An error occurred', 'error');
+                    }
+    
+                    Swal.fire('Error!', 'Payment failed', 'error');
+    
+                } catch (error) {
+                    Swal.fire('Error!', error.message || 'An error occurred while handling payment failure.', 'error');
+                }
+            });
+            rzp1.open();
+            Swal.close();
+    
+        } catch (error) {
+            console.error('Error:', error);
+            Swal.fire('Error!', error.message || 'An error occurred while adding money.', 'error');
+        }
+    }
+    
+    
+    async function handlePayment(amount, userId, razorpay_order_id, razorpay_payment_id, success) {
+        try {
+            console.log('parameters',amount,userId,razorpay_order_id,razorpay_payment_id,success );
+            const response = await fetch('/wallet/handledPayment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId,
+                    amount,
+                    razorpayOrderId: razorpay_order_id,
+                    razorpaymentId: razorpay_payment_id,
+                    success
+                })
+            });
+    
+            if (!response.ok) {
+                throw new Error(`Server Error: ${response.statusText}`);
+            }
+    
+            const data = await response.json();
+    
+            if (!data || !data.success) {
+                throw new Error(data?.message || 'Failed to handle payment');
+            }
+    
+            return { message: data.message, success , amount:data.amount};
+        } catch (err) {
+            console.error('Error:', err);
+            Swal.fire('Error!', err.message || 'An error occurred while handling payment.', 'error');
+            return { message: err.message, success: false };
+        }
+    }
+    
+
+    async function editPersonaldetails(event) {
+        event.preventDefault(); 
+    
+        const form = document.getElementById('personal-info-form');
+        const formData = new FormData(form);
+    
+        
+        form.querySelector('button.btn-secondary').disabled = true;
+        form.querySelector('button.btn-primary').disabled = true;
+    
+        const nameInput = form.querySelector('input[name="name"]');
+        const mobileInput = form.querySelector('input[name="mobile"]');
+        const usernameError = document.getElementById('username-error');
+        const mobileError = document.getElementById('mobile-error');
+    
+        
+        usernameError.textContent = '';
+        mobileError.textContent = '';
+        nameInput.classList.remove('error');
+        mobileInput.classList.remove('error');
+    
+        const usernameValue = nameInput.value.trim();
+        const mobileValue = mobileInput.value.trim();
+    
+        
+        if (usernameValue === '' || /\s/.test(usernameValue)) {
+            usernameError.textContent = 'Username cannot be empty or contain spaces.';
+            nameInput.classList.add('error');
+            form.querySelector('button.btn-secondary').disabled = false; 
+            form.querySelector('button.btn-primary').disabled = false; 
+            return;
+        }
+    
+        const mobilePattern = /^(?:(?:\+91|91)?[6789]\d{9})$/;
+        if (!mobilePattern.test(mobileValue)) {
+            mobileError.textContent = 'Please enter a valid mobile number.';
+            mobileInput.classList.add('error');
+            form.querySelector('button.btn-secondary').disabled = false; 
+            form.querySelector('button.btn-primary').disabled = false; 
+            return;
+        }
+    
+        try {
+            const response = await fetch('/userDashboard/updatePersonal', {
+                method: 'PATCH',
+                body: formData 
+            });
+    
+            if (!response.ok) throw new Error('Server responded with an error');
+    
+            const data = await response.json();
+    
+            if (data.success) {
+                document.querySelector('#personal-info-view p:nth-child(1)').innerHTML = `<strong>User Name:</strong> ${data.user.name}`;
+                document.querySelector('#personal-info-view p:nth-child(2)').innerHTML = `<strong>Mobile:</strong> ${data.user.mobile}`;
+                nameInput.value=data.user.name
+                mobileInput.value=data.user.mobile
+    
+                document.getElementById('personal-info-edit').style.display = 'none';
+                document.getElementById('personal-info-view').style.display = 'block';
+    
+                Swal.fire('Success', 'Your personal information has been updated!', 'success');
+            } else {
+                Swal.fire('Error', data.message || 'Failed to update your information.', 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            Swal.fire('Error', 'An unexpected error occurred. Please try again.', 'error');
+        } finally {
+            
+            form.querySelector('button.btn-secondary').disabled = false;
+            form.querySelector('button.btn-primary').disabled = false;
+        }
+    }
+
+    
+    async function changeEmail(event) {
+        event.preventDefault(); 
+    
+        const form = document.getElementById('change-email-form');
+        const formData = new FormData(form);
+    
+        form.querySelector('button.btn-secondary').disabled = true;
+        form.querySelector('button.btn-primary').disabled = true;
+    
+        const newEmailInput = form.querySelector('input[name="newEmail"]');
+        const confirmNewEmailInput = form.querySelector('input[name="confirmNewEmail"]');
+        const newEmailValue = newEmailInput.value.trim();
+        const confirmNewEmailValue = confirmNewEmailInput.value.trim();
+        const currentEmailInput = form.querySelector('input[name="currentEmail"]')
+    
+        const newEmailError = document.getElementById('new-email-error');
+        const confirmEmailError = document.getElementById('confirm-new-email-error');
+    
+        if (newEmailError) newEmailError.textContent = '';
+        if (confirmEmailError) confirmEmailError.textContent = '';
+        newEmailInput.classList.remove('error');
+        confirmNewEmailInput.classList.remove('error');
+    
+        if (newEmailValue === '' || !/\S+@\S+\.\S+/.test(newEmailValue)) {
+            if (newEmailError) newEmailError.textContent = 'Please enter a valid new email address.';
+            newEmailInput.classList.add('error');
+            form.querySelector('button.btn-secondary').disabled = false;
+            form.querySelector('button.btn-primary').disabled = false;
+            return;
+        }
+    
+        if (newEmailValue !== confirmNewEmailValue) {
+            if (confirmEmailError) confirmEmailError.textContent = 'New email and confirmation do not match.';
+            confirmNewEmailInput.classList.add('error');
+            form.querySelector('button.btn-secondary').disabled = false;
+            form.querySelector('button.btn-primary').disabled = false;
+            return;
+        }
+    
+        try {
+            Swal.fire({
+                title: 'Processing...',
+                text: 'Please wait while we update your email.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+    
+            const response = await fetch('/userDashboard/changeEmail', {
+                method: 'PATCH',
+                body: formData
+            });
+    
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.message || 'Server responded with an error');
+                }
+    
+                Swal.close(); 
+    
+                if (data.success) {
+                    const newEmail = data.newEmail;
+                    const email = data.user.email;
+    
+                    
+                    const { value: otp } = await Swal.fire({
+                        title: 'Verify OTP',
+                        input: 'text',
+                        inputLabel: 'Please enter the OTP sent to your new email address.',
+                        inputPlaceholder: 'Enter OTP',
+                        showCancelButton: true,
+                        confirmButtonText: 'Verify',
+                        cancelButtonText: 'Cancel',
+                        inputValidator: (value) => {
+                            if (!value) {
+                                return 'OTP is required';
+                            }
+                        }
+                    });
+    
+                    if (otp) {
+                        const otpResponse = await fetch('/userDashboard/verifyOtpAndChangeEmail', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ otp, email, newEmail })
+                        });
+    
+                        if (otpResponse.headers.get('content-type').includes('application/json')) {
+                            const otpData = await otpResponse.json();
+    
+                            if (!otpResponse.ok) {
+                                throw new Error(otpData.message || 'Failed to verify OTP');
+                            }
+    
+                            if (otpData.success) {
+                                newEmailInput.value = '';
+                                confirmNewEmailInput.value = '';
+                                document.querySelector('#change-email-view p').innerHTML = `<strong>Email:</strong> ${otpData.user.email}`;
+                                currentEmailInput.value = otpData.user.email
+                                document.getElementById('change-email-edit').style.display = 'none';
+                                document.getElementById('change-email-view').style.display = 'block';
+                                Swal.fire('Success', 'Your email has been updated and verified!', 'success');
+                            } else {
+                                Swal.fire('Error', otpData.message || 'Failed to verify OTP.', 'error');
+                            }
+                        } else {
+                            const text = await otpResponse.text();
+                            throw new Error(`Unexpected response: ${text}`);
+                        }
+                    }
+                } else {
+                    Swal.fire('Error', data.message || 'Failed to update your email.', 'error');
+                }
+            } else {
+                const text = await response.text();
+                throw new Error(`Unexpected response format: ${text}`);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            Swal.fire('Error', error.message || 'An unexpected error occurred. Please try again.', 'error');
+        } finally {
+            
+            form.querySelector('button.btn-secondary').disabled = false;
+            form.querySelector('button.btn-primary').disabled = false;
+        }
+    }
+    
+    
+
+    async function changePassword(event) {
+        event.preventDefault(); 
+    
+        const form = document.getElementById('change-password-form');
+        const formData = new FormData(form);
+    
+        form.querySelector('button.btn-secondary').disabled = true;
+        form.querySelector('button.btn-primary').disabled = true;
+    
+        const currentPasswordInput = form.querySelector('input[name="currentPass"]');
+        const newPasswordInput = form.querySelector('input[name="newPass"]');
+        const confirmNewPasswordInput = form.querySelector('input[name="confirmNewPass"]');
+    
+        const currentPasswordError = document.getElementById('current-password-error');
+        const newPasswordError = document.getElementById('new-password-error');
+        const confirmNewPasswordError = document.getElementById('confirm-new-password-error');
+    
+        if (currentPasswordError) currentPasswordError.textContent = '';
+        if (newPasswordError) newPasswordError.textContent = '';
+        if (confirmNewPasswordError) confirmNewPasswordError.textContent = '';
+        currentPasswordInput.classList.remove('error');
+        newPasswordInput.classList.remove('error');
+        confirmNewPasswordInput.classList.remove('error');
+    
+        const currentPasswordValue = currentPasswordInput.value.trim();
+        const newPasswordValue = newPasswordInput.value.trim();
+        const confirmNewPasswordValue = confirmNewPasswordInput.value.trim();
+    
+        if (currentPasswordValue === '') {
+            if (currentPasswordError) currentPasswordError.textContent = 'Current password is required.';
+            currentPasswordInput.classList.add('error');
+            form.querySelector('button.btn-secondary').disabled = false;
+            form.querySelector('button.btn-primary').disabled = false;
+            return;
+        }
+    
+        if (newPasswordValue === '' || newPasswordValue.length < 6) {
+            if (newPasswordError) newPasswordError.textContent = 'New password must be at least 6 characters long.';
+            newPasswordInput.classList.add('error');
+            form.querySelector('button.btn-secondary').disabled = false;
+            form.querySelector('button.btn-primary').disabled = false;
+            return;
+        }
+    
+        if (newPasswordValue !== confirmNewPasswordValue) {
+            if (confirmNewPasswordError) confirmNewPasswordError.textContent = 'New password and confirmation do not match.';
+            confirmNewPasswordInput.classList.add('error');
+            form.querySelector('button.btn-secondary').disabled = false;
+            form.querySelector('button.btn-primary').disabled = false;
+            return;
+        }
+    
+        try {
+            Swal.fire({
+                title: 'Processing...',
+                text: 'Please wait while we send the OTP to your email.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+    
+            const response = await fetch('/userDashboard/changePassword', {
+                method: 'PATCH',
+                body: formData
+            });
+    
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to request OTP.');
+            }
+            const data = await response.json()
+            Swal.close(); 
+
+            if(data.success){
+            const email = data.user.email
+            const newpass = data.newpass
+
+            const { value: otp } = await Swal.fire({
+                title: 'Verify OTP',
+                input: 'text',
+                inputLabel: 'Please enter the OTP sent to your email address.',
+                inputPlaceholder: 'Enter OTP',
+                showCancelButton: true,
+                confirmButtonText: 'Verify',
+                cancelButtonText: 'Cancel',
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'OTP is required.';
+                    }
+                }
+            });
+    
+            if (otp) {
+                
+                const otpResponse = await fetch('/userDashboard/verifyOtpAndChangePassword', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ otp, newpass, email })
+                });
+    
+                if (!otpResponse.ok) {
+                    const otpErrorData = await otpResponse.json();
+                    throw new Error(otpErrorData.message || 'Failed to verify OTP.');
+                }
+    
+                const otpData = await otpResponse.json();
+    
+                if (otpData.success) {
+                    
+                    currentPasswordInput.value = '';
+                    newPasswordInput.value = '';
+                    confirmNewPasswordInput.value = '';
+    
+                    Swal.fire('Success', 'Your password has been updated!', 'success');
+                } else {
+                    Swal.fire('Error', otpData.message || 'Failed to update your password.', 'error');
+                }
+            }
+        }else{
+            swal.fire('Error',data.message||'failed request otp','error')
+        }
+        } catch (error) {
+            console.error('Error:', error);
+            Swal.fire('Error', error.message || 'An unexpected error occurred. Please try again.', 'error');
+        } finally {
+            
+            form.querySelector('button.btn-secondary').disabled = false;
+            form.querySelector('button.btn-primary').disabled = false;
+        }
+    }
+    
+    
+    
+
+    function toggleEditMode(section) {
+        const viewMode = document.getElementById(`${section}-view`);
+        const editMode = document.getElementById(`${section}-edit`);
+    
+        
+        if (editMode && (viewMode || section === 'change-password')) {
+            if (editMode.style.display === "none") {
+                
+                editMode.style.display = "block";
+                if (viewMode) viewMode.style.display = "none";
+            } else {
+                
+                editMode.style.display = "none";
+                if (viewMode) viewMode.style.display = "block";
+            }
+        }
+    }
+    
+   
+    document.addEventListener('DOMContentLoaded', function () {
+        
+        const activeTabId = localStorage.getItem('activeTab') || 'dashboard-tab';
+        
+        console.log("Active Tab from localStorage:", activeTabId);
+
+       
+        const activeTab = document.querySelector(`#${activeTabId}`);
+        if (activeTab) {
+           
+            new bootstrap.Tab(activeTab).show();
+        } else {
+            console.log("Active Tab not found!");
+        }
+
+        
+        document.querySelectorAll('.nav-link').forEach(tab => {
+            tab.addEventListener('click', function () {
+                
+                console.log("Clicked Tab:", this.id);
+                localStorage.setItem('activeTab', this.id);
+            });
+        });
+    });
+
+    function confirmDelete(addressId) {
+        if (confirm('Are you sure you want to delete this address?')) {
+            
+            window.location.href = '/delete-address/' + addressId;
+        }
+        
+    }
+
+    async function returnProduct(itemId, productId, orderId, orderStatus) {
+        if (orderStatus === 'shipped') {
+            Swal.fire('info', 'Product has been shipped. Order cannot be returned', 'info');
+            return;
+        }
+    
+        try {
+            const reasonResult = await Swal.fire({
+                title: 'Select a reason for refund',
+                html: `
+                    <select id="refundReason" class="swal2-input">
+                        <option value="">Select a reason</option>
+                        <option value="Damaged Item">Damaged Item</option>
+                        <option value="Incorrect Item">Incorrect Item</option>
+                        <option value="Item Not as Described">Item Not as Described</option>
+                        <option value="Quality Issue">Quality Issue</option>
+                    </select>
+                `,
+                focusConfirm: false,
+                preConfirm: () => {
+                    const reason = Swal.getPopup().querySelector('#refundReason').value;
+                    if (!reason) {
+                        Swal.showValidationMessage('Please select a reason');
+                    }
+                    return reason;
+                }
+            });
+    
+            if (!reasonResult.isConfirmed) {
+                return;
+            }
+    
+            const confirmResult = await Swal.fire({
+                title: 'Confirm Refund',
+                text: `Are you sure you want to request a refund?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, request refund',
+                cancelButtonText: 'Cancel'
+            });
+    
+            if (!confirmResult.isConfirmed) {
+                return;
+            }
+    
+            const response = await fetch('/orders/returnOrder', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    itemId,
+                    orderStatus,
+                    reason: reasonResult.value
+                })
+            });
+    
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Something went wrong');
+            }
+    
+            await Swal.fire({
+                title: 'Refund Requested',
+                text: 'Your refund request has been submitted successfully.',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            });
+    
+            const row = document.querySelector(`div[data-order-id="${orderId}"]`);
+            console.log('Row:', row); 
+    
+            if (!row) {
+                throw new Error('Order row not found');
+            }
+    
+            const statusCell = row.querySelector(`#itemOrderStatus${itemId}`);
+            const returnButton = row.querySelector(`#returnProductButton${itemId}`);
+            const cancelButton = row.querySelector(`#cancelProductButton${itemId}`);
+    
+    
+            statusCell.innerHTML = `<strong>Status: RETURN INITIATED</strong>`;
+            returnButton.disabled = true;
+            
+    
+        } catch (error) {
+            console.error('Error processing refund:', error.message);
+            await Swal.fire({
+                title: 'Error',
+                text: `An error occurred: ${error.message}`,
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        }
+    }
+    
+    
+ 
+
+
+    const cancelOrderItem = (itemId, orderId, itemOrderStatus) => {
+        console.log(`Cancel product ${itemId} in order ${orderId}, ${itemOrderStatus}`);
+    
+        Swal.fire({
+            title: 'Cancellation Reason',
+            input: 'textarea',
+            inputLabel: 'Please enter the reason for cancellation',
+            inputPlaceholder: 'Enter the reason...',
+            inputAttributes: {
+                'aria-label': 'Enter the reason for cancellation'
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Next',
+            cancelButtonText: 'Cancel',
+            inputValidator: (value) => {
+                if (!value) {
+                    return 'You need to enter a reason!';
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You are about to cancel this product.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, cancel it!',
+                    cancelButtonText: 'No, keep it'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch('/orders/cancelItem', {
+                            method: "PATCH",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                itemId,
+                                orderId,
+                                itemOrderStatus
+                            })
+                        })
+                        .then((response) => {
+                            if (!response.ok) {
+                                return response.json().then(errorData => {
+                                    throw new Error(errorData.error || "Network response was not ok");
+                                });
+                            }
+                            return response.json();
+                        })
+                        .then((data) => {
+                            console.log(data);
+    
+                            if (data.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    text: 'The product has been cancelled successfully.',
+                                    toast: true,
+                                    position: 'top-right',
+                                    showConfirmButton: false,
+                                    timerProgressBar: true,
+                                    timer: 3000
+                                });
+    
+                                // Update UI elements
+                                const button = document.getElementById(`cancelProductButton${itemId}`);
+                                if (button) {
+                                    button.disabled = true;
+                                    button.textContent = 'Cancelled';
+                                }
+    
+                                const orderProductStatusElement = document.getElementById(`itemOrderStatus${itemId}`);
+                                if (orderProductStatusElement) {
+                                    orderProductStatusElement.innerHTML = '<strong>Status: CANCELLED</strong>';
+                                }
+    
+                                // Update order amounts and status
+                                if (data.allOrderCancelled) {
+                                    const cancelOrderButton = document.getElementById(`cancelOrderButton${orderId}`);
+                                    if (cancelOrderButton) {
+                                        cancelOrderButton.disabled = true;
+                                        cancelOrderButton.textContent = "Cancelled";
+                                    }
+    
+                                    const orderStatusElement = document.getElementById(`orderStatus${orderId}`);
+                                    if (orderStatusElement) {
+                                        orderStatusElement.innerHTML = '<strong>CANCELLED</strong>';
+                                    }
+    
+                                    const orderProductStatusElements = document.querySelectorAll('.order-product-status');
+                                    orderProductStatusElements.forEach(element => {
+                                        element.innerHTML = '<strong>Status: CANCELLED</strong>';
+                                    });
+    
+                                    const individualCancelButtons = document.querySelectorAll(".individualCancel");
+                                    individualCancelButtons.forEach(button => {
+                                        button.disabled = true;
+                                        button.textContent = "Cancelled";
+                                    });
+                                }
+    
+                                // Update amounts (assuming data includes updated amounts)
+                                if (data.updatedAmounts) {
+                                    const { subTotalAmount, totalAmount } = data.updatedAmounts;
+    
+                                    const subTotalElement = document.getElementById('subTotalAmount');
+                                    if (subTotalElement) {
+                                        subTotalElement.textContent = `Subtotal: $${subTotalAmount.toFixed(2)}`;
+                                    }
+    
+                                    const totalAmountElement = document.getElementById('totalAmount');
+                                    if (totalAmountElement) {
+                                        totalAmountElement.textContent = `Total: $${totalAmount.toFixed(2)}`;
+                                    }
+                                }
+                            }
+                        })
+                        .catch((error) => {
+                            console.log(`Error while cancelling product`, error.message);
+                            Swal.fire({
+                                icon: 'error',
+                                text: `Error: ${error.message}`,
+                                toast: true,
+                                position: 'top-right',
+                                showConfirmButton: false,
+                                timerProgressBar: true,
+                                timer: 3000
+                            });
+                        });
+                    }
+                });
+            }
+        });
+    };
+    
+    
+</script>
+
+<%- include('../layout/user_footer.ejs') %>

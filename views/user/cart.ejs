@@ -1,0 +1,300 @@
+<%- include('../layout/user_header.ejs') %>
+
+<div class="container mt-5 p-5" id="mainContainer">
+  <div class="row">
+    <!-- Main Cart Content -->
+    <% if (!cart || cart.items.length === 0) { %>
+    <div class="col-12 text-center">
+      <h2>Your cart is empty!</h2>
+      <p>Add items to it now.</p>
+      <a href="/shop" class="btn btn-primary">Shop now</a>
+    </div>
+    <% } else { %>
+    <div class="col-md-8" id="sendCartItem">
+      <% cart.items.forEach(item => { %>
+      <div class="card mb-3" id="productContainer">
+        <div class="row no-gutters">
+          <div class="col-md-4 d-flex align-items-center justify-content-center">
+            <img src="imgs/products/<%= item.product?.product_images[0] %>" class="card-img" style="width: 150px; height: 150px; object-fit: cover; margin-bottom: 15px;" alt="Product Image">
+          </div>
+          <div class="col-md-8">
+            <div class="card-body">
+              <h5 class="card-title"><%= item.product?.name %></h5>
+              <strong>Price:</strong> <span style="color: green;"> ₹<%= item.price %></span>
+              <br>
+              <strong>Quantity:</strong>
+                <span class="item-quantity"> <%= item.product?.product_quantity %></span>
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                  <div class="me-2">Qty:</div>
+                  <button class="btn btn-sm btn-secondary decrease-quantity" data-product-item-id="<%= item._id %>" onclick="decreaseQuantity('<%= item._id %>')">-</button>
+                  <span class="quantity-display mx-2" id="itemProductQuantity"><%= item.quantity %></span>
+                  <button class="btn btn-sm btn-secondary increase-quantity" data-product-item-id="<%= item._id %>" onclick="addQuantity('<%= item._id %>','<%= item.product.product_quantity %>')">+</button>
+                </div>
+                <span class="text-secondary" style="text-decoration: none; cursor: pointer; margin-bottom: 50px;" onclick="removeItem('<%= item._id %>')">Remove</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+
+    <!-- Order Summary -->
+    <div class="col-md-4" style="position: sticky; top: 0; height: 100vh;">
+      <div class="card mb-3"> 
+        <div class="card">
+
+       </div>
+        <div class="card-body">
+          <h5 class="card-title">ORDER SUMMARY</h5>
+          <p class="card-text d-flex justify-content-between">
+            <span id="selectionItemsLength">Price (<%= cart.items.length %> items)</span>
+            <span id="subTotalPrice">₹<%= summary.subtotal %></span>
+          </p>
+          <p class="card-text d-flex justify-content-between">
+            <span>Delivery Charges</span>
+            <span id="deliveryCharge" class="text-success"><%= summary.deliveryCharges || 'Free' %></span>
+          </p>
+          <p class="card-text d-flex justify-content-between">
+            <span>Offer Discount</span>
+            <span id="offerDiscount" class="text-success">₹<%= summary.offerDiscount || '0.00'%></span>
+          </p>
+          <p class="card-text d-flex justify-content-between">
+            <span>Coupon Discount</span>
+            <span id="couponDiscount" class="text-success">₹<%= summary.couponDiscount || '0.00'%></span>
+          </p>
+          <hr>
+          <p class="card-text d-flex justify-content-between">
+            <strong>Total Amount</strong>
+            <strong><span id="totalPrice">₹<%= summary.total %></span></strong>
+          </p>
+        </div>
+        
+        <div class="row">
+          <div class="col" id="checkout">
+            
+            <a href="/checkoutpage/<%= cart.user._id %>" onclick="validate(event)"  >
+              <button type="submit" id="checkoutButton" class="btn custom-button btn-lg w-100" <%= parseFloat(summary.total) === 0 ? 'disabled' : '' %>>Proceed to Check Out</button>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <% } %>
+  </div>
+</div>
+
+
+
+
+<script>
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const checkoutBtn = document.querySelector('#checkoutButton');
+        if (checkoutBtn) {
+            checkoutBtn.disabled = false;
+        }
+    });
+  
+    function validate(event) {
+        event.preventDefault();
+        event.stopPropagation();
+  
+        const checkoutBtn = document.querySelector('#checkoutButton');
+        if (checkoutBtn) {
+
+            fetch(`/cart/validateCart/<%= cart._id %>`)
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(data => {
+                            throw new Error(data.message || 'Failed to validate cart');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data.success) {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Quantity Limit Reached',
+                            text: data.message || 'You cannot proceed to checkout as one or more items exceed the maximum quantity allowed.',
+                            confirmButtonText: 'Okay'
+                        });
+                    } else {
+
+                        window.location.href = `/checkoutpage/<%= cart.user._id %>`;
+                    }
+                })
+                .catch(error => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: error.message,
+                        confirmButtonText: 'Okay'
+                    });
+                });
+        }
+    }
+
+  
+  
+  async function removeItem(itemId) {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: 'You won\'t be able to revert this!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, remove it!',
+      cancelButtonText: 'No, cancel!'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await fetch(`/removeItem?itemId=${itemId}`, { method: 'DELETE' });
+        if (!response.ok) throw new Error('Server responded with an error');
+
+        const data = await response.json();
+        if (data.success) {
+          if (!data.isEmpty) {
+            const itemElement = document.querySelector(`[data-product-item-id="${itemId}"]`).closest('.card.mb-3');
+            if (itemElement) {
+              itemElement.remove();
+              updateOrderSummary(data.summary);
+              document.getElementById('selectionItemsLength').textContent = `Price (${data.cart.items.length} items)`
+              return;
+            }
+          }
+
+          if (data.isEmpty) {
+            const mainContainer = document.getElementById('mainContainer');
+            if (mainContainer) {
+              mainContainer.innerHTML = '';
+
+              const emptyCartMessage = document.createElement('div');
+              emptyCartMessage.className = 'col-12 text-center';
+              emptyCartMessage.innerHTML = `
+                <h2>Your cart is empty!</h2>
+                <p>Add items to it now.</p>
+                <a href="/shop" class="btn btn-primary">Shop now</a>
+              `;
+              
+              mainContainer.appendChild(emptyCartMessage); 
+            }
+          }
+        } else {
+          Swal.fire('Error!', `There was a problem removing the item: ${data.message}`, 'error');
+        }
+      } catch (error) {
+        console.error('Failed to remove item:', error);
+        Swal.fire('Error!', `An unexpected error occurred: ${error.message}`, 'error');
+      }
+    }
+  }
+
+  // Function to increase quantity of an item
+  async function addQuantity(itemId, itemQuantity) {
+    try {
+      const quantityDisplay = document.querySelector(`[data-product-item-id="${itemId}"]`).closest('.card.mb-3').querySelector('.quantity-display');
+      const currentQuantity = parseInt(quantityDisplay.textContent, 10);
+      
+      if (currentQuantity >= 5) {
+        Swal.fire('Limit Reached', 'You can’t add any more of this product.', 'info');
+        return;
+      }
+
+      const response = await fetch(`/increase-quantity?itemId=${itemId}`, 
+      
+      {
+         method: 'PATCH',
+         headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await response.json();
+      if (data.success) {
+        
+        quantityDisplay.textContent = data.updatedQuantity;
+        document.querySelector(`[data-product-item-id="${itemId}"]`).closest('.card.mb-3').querySelector('.decrease-quantity').disabled = false;
+        updateOrderSummary(data.summary);
+      } else {
+        Swal.fire(data.eTitle || 'Error!', data.message || 'There was a problem updating the quantity.', data.eStats||'error');
+      }
+    } catch (error) {
+      console.error('Failed to update quantity:', error);
+      Swal.fire('Error!', error.message || 'An unexpected error occurred.', 'error');
+    }
+  }
+
+  // Function to decrease quantity of an item
+  async function decreaseQuantity(itemId) {
+    try {
+      const quantityDisplay = document.querySelector(`[data-product-item-id="${itemId}"]`).closest('.card.mb-3').querySelector('.quantity-display');
+      const currentQuantity = parseInt(quantityDisplay.textContent, 10);
+      
+      if (currentQuantity <= 1) {
+        Swal.fire('Minimum Quantity', 'You cannot reduce the quantity below 1.', 'info');
+        return;
+      }
+
+      const response = await fetch(`/decrease-quantity?itemId=${itemId}`, 
+      {
+         method: 'PATCH',
+         headers: { 'Content-Type': 'application/json' }
+      });
+      if (!response.ok) throw new Error('Server responded with an error');
+
+      const data = await response.json();
+      if (data.success) {
+        
+        quantityDisplay.textContent = data.updatedQuantity;
+        if (data.updatedQuantity == 1) {
+          document.querySelector(`[data-product-item-id="${itemId}"]`).closest('.card.mb-3').querySelector('.decrease-quantity').disabled = true;
+        }
+        updateOrderSummary(data.summary);
+      } else {
+        Swal.fire('Error!', 'There was a problem updating the quantity.', 'error');
+      }
+    } catch (error) {
+      console.error('Failed to update quantity:', error);
+      Swal.fire('Error!', error || 'An unexpected error occurred.', 'error');
+    }
+  }
+
+  
+  function updateOrderSummary(summary) {
+    const subTotalPrice = document.getElementById('subTotalPrice');
+    const totalPrice = document.getElementById('totalPrice');
+    const deliveryCharge = document.getElementById('deliveryCharge');
+    const checkoutButton = document.getElementById('checkoutButton');
+    const couponDiscount = document.getElementById('couponDiscount');
+    const offerDiscount = document.getElementById('offerDiscount');
+
+    if (subTotalPrice) {
+      subTotalPrice.textContent = `₹${summary.subtotal}`;
+    }
+
+    if (totalPrice) {
+      totalPrice.textContent = `₹${summary.total}`;
+    }
+
+    if (deliveryCharge) {
+      deliveryCharge.textContent = summary.deliveryCharges > 0 ? `₹${summary.deliveryCharges}` : 'Free';
+    }
+
+    if (couponDiscount) {
+      couponDiscount.textContent = `₹${summary.couponDiscount}`;
+    }
+    if(offerDiscount){
+      offerDiscount.textContent = `₹${summary.offerDiscount}`;
+    }
+    if (checkoutButton) {
+      checkoutButton.disabled = parseFloat(summary.total) === 0;
+    }
+   
+  }
+
+  
+</script>
+
+<%- include('../layout/user_footer.ejs') %>

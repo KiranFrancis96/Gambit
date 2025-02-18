@@ -1,0 +1,226 @@
+<%- include('../layout/admin_header.ejs') %>
+<section class="content-main">
+    <div class="content-header">
+        <h2 class="content-title">Edit Product:</h2>
+        <div>
+            <a href="/admin/products" class="btn btn-outline-primary"><i class="fas fa-list"></i> Product List</a>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <div class="card-body">
+            <form id="productForm" action="/admin/products/edit-product" method="post" enctype="multipart/form-data" novalidate>
+                <input type="hidden" name="id" value="<%= product._id %>">
+                
+                <div class="mb-3">
+                    <label for="productName" class="form-label">Product Name</label>
+                    <input type="text" id="productName" class="form-control" name="pro_name" placeholder="Enter the product Name" value="<%= product.product_name %>" required>
+                    <div class="invalid-feedback">Product name is required.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="productBrand" class="form-label">Product Brand</label>
+                    <input type="text" id="productBrand" class="form-control" name="pro_brand" placeholder="Enter product brand" value="<%= product.product_brand %>" required>
+                    <div class="invalid-feedback">Product brand is required.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="productDescription" class="form-label">Product Description</label>
+                    <textarea id="productDescription" class="form-control" name="pro_description" rows="3" placeholder="Product description" required><%= product.product_description %></textarea>
+                    <div class="invalid-feedback">Product description is required.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="category" class="form-label">Category</label>
+                    <select id="category" name="pro_category" class="form-control" required>
+                        <option value="<%= product.product_category._id %>">Select a category</option>
+                        <% categories.forEach(cat => { %>
+                            <option value="<%= cat._id %>" <%= cat._id === product.pro_category ? 'selected' : '' %>><%= cat.name %></option>
+                        <% }) %>
+                    </select>
+                    <div class="invalid-feedback">Please select a category.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="productPrice" class="form-label">Price</label>
+                    <input type="number" id="productPrice" class="form-control" name="pro_reg_price" placeholder="Enter the Original price" value="<%= product.product_regular_price %>" min="0" step="0.01" required>
+                    <div class="invalid-feedback">Original price is required and must be a positive number.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="productQuantity" class="form-label">Quantity</label>
+                    <input type="number" id="productQuantity" class="form-control" name="pro_quantity" placeholder="Enter quantity of the product" value="<%= product.product_quantity %>" min="0" required>
+                    <div class="invalid-feedback">Quantity is required and must be a positive number.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="offerPrice" class="form-label">Offer Price</label>
+                    <input type="number" id="offerPrice" class="form-control" name="pro_sale_price" placeholder="Enter sales price" value="<%= product.product_sale_price %>" min="0" step="0.01" required>
+                    <div class="invalid-feedback">Offer price is required and must be a positive number.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="existingImages" class="form-label">Existing Images</label>
+                    <div id="existingImages" class="image-list d-flex flex-wrap">
+                        <% product.product_images.forEach((image, index) => { %>
+                            <div class="image-item position-relative">
+                                <img src="/imgs/products/<%= image %>" alt="Existing image" class="mt-2" style="max-width: 200px;">
+                                <button class="btn btn-sm btn-danger" onclick="removeImage(event, '<%= image %>', '<%= product._id %>')">remove</button>
+                            </div>
+                        <% }) %>
+                    </div>                    
+                </div>
+
+                <div class="mb-3">
+                    <label for="productImages" class="form-label">Add New Images (Max 3 total)</label>
+                    <input type="file" id="productImages" class="form-control" name="pro_images" multiple accept="image/*" onchange="handleFileInput()">
+                    <div class="invalid-feedback">You can only add up to 3 total images.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="imagePreview" class="form-label">New Images Preview</label>
+                    <div id="imagePreview" class="d-flex flex-wrap">
+                        <!-- Preview images will be shown here -->
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Update Product</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<script>
+
+    async function removeImage(event, image, productId) {
+        event.preventDefault();
+        event.stopPropagation();
+    
+        try {
+            const response = await fetch('/admin/product/remove-image', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image, productId })
+            });
+    
+            if (!response.ok) throw new Error('Server responded with an error');
+    
+            const data = await response.json();
+            if (!data.success) throw new Error(data.message || 'Something went wrong');
+           
+            const imageItem = event.target.closest('.image-item');
+            if (imageItem) {
+                imageItem.remove();
+            }
+            addedFiles = addedFiles.filter(f => f.name !== image); 
+    
+        } catch (e) {
+            console.log(e);
+            Swal.fire('Error', e.message || 'Something went wrong', 'error');
+        }
+    }
+    
+    
+    
+
+let addedFiles = [];
+
+function handleFileInput() {
+    const fileInput = document.getElementById('productImages');
+    const preview = document.getElementById('imagePreview');
+    const files = fileInput.files;
+
+    if (files.length > 0 && addedFiles.length + files.length > 3) {
+        alert('You can only add up to 3 total images.');
+        fileInput.value = ''; 
+        return;
+    }
+
+    preview.innerHTML = ''; 
+
+    addedFiles = Array.from(files);
+
+    for (const file of files) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const imgDiv = document.createElement('div');
+            imgDiv.classList.add('image-preview', 'position-relative');
+            imgDiv.style.marginRight = '10px';
+            imgDiv.style.marginBottom = '10px';
+
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.style.maxWidth = '200px';
+
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.classList.add('btn', 'btn-danger', 'btn-sm', 'position-absolute');
+            removeBtn.style.top = '5px';
+            removeBtn.style.right = '5px';
+            removeBtn.textContent = 'Remove';
+            removeBtn.onclick = function() {
+                imgDiv.remove();
+                removeFileFromInput(file);
+                updateFileInputValidation();
+            };
+
+            imgDiv.appendChild(img);
+            imgDiv.appendChild(removeBtn);
+            preview.appendChild(imgDiv);
+        };
+
+        reader.readAsDataURL(file);
+    }
+
+    updateFileInputValidation();
+}
+
+function removeFileFromInput(file) {
+    const dataTransfer = new DataTransfer();
+    addedFiles.forEach(f => {
+        if (f !== file) {
+            dataTransfer.items.add(f);
+        }
+    });
+    document.getElementById('productImages').files = dataTransfer.files;
+    addedFiles = Array.from(dataTransfer.files);
+}
+
+function updateFileInputValidation() {
+    const totalImages = document.getElementById('imagePreview').children.length;
+    const fileInput = document.getElementById('productImages');
+
+    fileInput.disabled = totalImages >= 3;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    updateFileInputValidation();
+});
+
+document.getElementById('productForm').addEventListener('submit', function(event) {
+    const form = event.target;
+    const regPrice = parseFloat(document.getElementById('productPrice').value);
+    const salePrice = parseFloat(document.getElementById('offerPrice').value);
+
+    if (salePrice > regPrice) {
+        event.preventDefault();
+        event.stopPropagation();
+        Swal.fire({
+            icon: 'error',
+            text: 'Offer price cannot be greater than the regular price.',
+            toast: true,
+            position: 'top-right',
+            showConfirmButton: false,
+            timerProgressBar: true,
+            timer: 3000
+        });
+    }
+
+    if (!form.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+        form.classList.add('was-validated');
+    }
+});
+</script>
+
+<%- include('../layout/admin_footer.ejs') %>

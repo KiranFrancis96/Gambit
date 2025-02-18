@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Cropping with Croppie JS</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- ADD CROPPIE -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Crop Image using Croppie JS</h1>
+        <input type="file" id="upload" accept="image/*">
+        <br><br>
+        <div id="croppieContainer"></div>
+        <img src="" alt="croppedImage" id="croppedImage">
+        <br>
+        <button id="btnCrop">Crop Image</button>
+        <button id="btnRefresh">Crop Another Image</button>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

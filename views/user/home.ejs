@@ -1,0 +1,252 @@
+<%- include("../layout/user_header.ejs") %>
+<main class="main">
+    <section class="section-padding">
+        <div class="container wow fadeIn animated">
+            <h3 class="section-title mb-20"><span>New</span> Arrivals</h3>
+            <div class="carausel-6-columns-cover position-relative">
+                <div class="slider-arrow slider-arrow-2 carausel-6-columns-arrow" id="carausel-6-columns-2-arrows"></div>
+                <div class="carausel-6-columns carausel-arrow-center" id="carausel-6-columns-2">
+                    
+                    <% sortedProducts.forEach((product) => { %>
+                    <div class="product-cart-wrap small hover-up">
+                        <div class="product-img-action-wrap">
+                            <div class="product-img product-img-zoom">
+                                <a href="/product-details/<%= product._id %>">
+                                    <img class="default-img" src="/imgs/products/<%= product.product_images[0] %>" alt="">
+                                    <img class="hover-img" src="/imgs/products/<%= product.product_images[1] %>" alt="">
+                                </a>
+                            </div>
+
+                        </div>
+                        <div class="product-content-wrap">
+                            <h2><a href="/product-details/<%= product._id %>"><%= product.product_name %></a></h2>
+                            <div class="rating-result">
+                                <span>
+                                </span>
+                            </div>
+                            <div class="product-price">
+                                <span><%= product.offerAmount ? product.offerAmount : product.product_sale_price %></span>
+                            </div>
+                        </div>
+                    </div>
+                    <% }) %>
+                    <!--End product-cart-wrap-2-->
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="container my-5">
+        <section class="mb-5">
+            <h2 class="section-title">Exclusive Offers</h2>
+            <div class="row">
+                <% categories.forEach(category => { %>
+                    <% if (category.offer) { %>
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body d-flex flex-column text-center p-4"
+                                    style="background-color: #f8f9fa; border-radius: 10px;">
+                                    <div class="icon mb-3">
+                                        <i class="fas fa-tag fa-3x" style="color: #333;"></i>
+                                    </div>
+                                    <h5 class="card-title" style="color: #333; font-size: 1.8rem; font-weight: 700;">
+                                        <%= category.offer?.name %>
+                                    </h5>
+                                    <p class="card-text mt-3" style="color: #555; font-size: 1.4rem;">
+                                        <span class="fw-bold">
+                                            <%= category.offer?.discountPercentage %>% OFF
+                                        </span>
+                                    </p>
+                                    <a href="/shop?categories=<%= category._id %>" class="btn btn-dark mt-auto fw-bold"
+                                        style="border-radius: 25px; padding: 10px 20px;">
+                                        Explore Now
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+                <% }) %>
+            </div>
+        </section>
+    </div>
+    <section class="popular-categories section-padding mt-15">
+        <div class="container wow fadeIn animated">
+            <h3 class="section-title mb-20"><span>Popular</span> Categories</h3>
+            <div class="carausel-6-columns-cover position-relative">
+                <div class="slider-arrow slider-arrow-2 carausel-6-columns-arrow" id="carausel-6-columns-arrows"></div>
+                <div class="carausel-6-columns" id="carausel-6-columns">
+                    <% categories.forEach((cat) => { %>
+                        <div class="card-1">
+                            <figure class="img-hover-scale overflow-hidden">
+                                <a href="/shop?catId=<%= cat._id %>">
+                                    <img src="/imgs/categories/<%= cat.image %>" alt="" height="200px">
+                                </a>
+                            </figure>
+                            <h5><a href="/shop?catId=<%= cat._id %>"><%= cat.name %></a></h5>
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="product-tabs pt-25 pb-20 wow fadeIn animated">
+        <div class="container">
+            <div class="row product-grid-4">
+                <% products.forEach((product, index) => { %>
+                <div class="col-lg-4 col-md-4 col-12 col-sm-6">
+                    <div class="product-cart-wrap mb-30">
+                        <div class="product-img-action-wrap">
+                            <div class="product-img product-img-zoom">
+                                <a href="/product-details/<%= product._id %>">
+                                    <% product.product_images.forEach(image => { %>
+                                        <img class="default-img img-fluid" src="/imgs/products/<%= image %>">
+                                        <img class="hover-img img-fluid" src="/imgs/products/<%= image %>">
+                                    <% }) %>
+                                </a>
+                            </div>
+                            <div class="product-action-1">
+                                <a aria-label="Add To Wishlist" class="action-btn hover-up mb-2" onclick="wishlist(this,event,'<%= product._id %>')"><i <% if(wishlist && wishlist.products && wishlist.products.includes(product._id)) {%>class="bi bi-heart-fill"<%} else {%> class="bi bi-heart"<% } %> ></i></a>
+                            </div>
+                        </div>
+                        <div class="product-content-wrap">
+                            <div class="product-category">
+                                <a href="/"><%= product.product_category.name %></a>
+                            </div>
+                            <h2><a href="/product-details/<%= product._id %>"><%= product.product_name %></a></h2>
+                            <div class="rating-result">
+                                <span>
+                                    <span></span>
+                                </span>
+                            </div>
+                            <div class="product-price">
+                                <% if (product.offerType == 'product' && product.offer.expiryDate >= Date.now()) { %>
+                                    <span>₹ <%= product.offerPrice %> </span>
+                                    <span class="old-price"> <%= product.product_sale_price %> </span>
+                                    <span class="ms-3 text-danger">(<%= product.offer?.discountPercentage %>% off)</span>
+                                <% }else if(product.offerType == 'category' && product.product_category?.offer?.expiryDate>=Date.now()){%>
+                                    <span>₹ <%= product.offerPrice %> </span>
+                                    <span class="old-price"> <%= product.product_sale_price %> </span>
+                                    <span class="ms-3 text-danger">(<%= product.product_category?.offer?.discountPercentage %>% off)</span>
+                                <%}else{ %>
+                                    <span>₹ <%= product.product_sale_price %> </span>
+                                    <span class="old-price"> <%= product.product_regular_price === product.product_sale_price ? '' : '₹' + product.product_regular_price %></span>
+                                <% } %>
+                            </div>
+                            <div class="product-action-1 show">
+                                <a aria-label="Add To Cart" class="action-btn hover-up" onclick="addtoCart('<%= product._id %>')" ><i class="fi-rs-shopping-bag-add"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <% }) %>
+            </div>
+        </div>
+    </section>
+
+    <div class="container d-flex justify-content-center">
+        <div class="mb">
+            <a href="/shop"><button type="button" class="btn btn-secondary btn-sm">Show More</button></a>
+        </div>
+    </div>
+
+    <%- include("../layout/user_footer.ejs") %>
+    
+    <script>
+        async function wishlist(wish, event, productId) {
+            event.preventDefault();
+            const icon = wish.querySelector('i');
+            const change = icon.classList.contains('bi-heart') ? 'add' : 'remove';
+            const method = change === 'add' ? 'POST' : 'DELETE';
+            
+            icon.classList.add(change === 'add' ? 'heart-beat' : 'fade-out');
+            
+            try {
+                const response = await fetch(`/wishlist/${change}`, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ productId })
+                });
+                
+                const data = await response.json();
+                if (!data.success) throw new Error(data.message || 'Response error');
+        
+                if (change === 'add') {
+                    icon.classList.remove('bi-heart');
+                    icon.classList.add('bi-heart-fill');
+                } else {
+                    icon.classList.remove('bi-heart-fill');
+                    icon.classList.add('bi-heart');
+                }
+        
+            } catch (err) {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: err || 'Error processing wishlist',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    customClass: {
+                        popup: 'colored-toast'
+                    }
+                });
+            } finally {
+                setTimeout(() => {
+                    icon.classList.remove('heart-beat', 'fade-out');
+                }, 600);
+            }
+        }
+
+        
+        async function addtoCart(productId) {
+            try {
+                event.preventDefault();
+                const response = await fetch('/update-cart', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ productId })
+                });
+        
+                const data = await response.json();
+                if (!data.success && data.itemExist) {
+                    return window.location.href = '/cart';
+                }
+                if (!data.success) throw new Error(data.message || 'Response error');
+        
+                if (data.success) {
+
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: data.message || 'Item added to cart',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        customClass: {
+                            popup: 'colored-toast'
+                        }
+                    });
+                }
+                
+            } catch (err) {
+                console.log(err);
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: err || 'Error processing wishlist',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    customClass: {
+                        popup: 'colored-toast'
+                    }
+                });
+            }
+        }
+        
+    
+    </script>
+</main>

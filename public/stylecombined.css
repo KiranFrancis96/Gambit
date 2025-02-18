@@ -1,0 +1,150 @@
+/* General Styles */
+body {
+    background-color: #cde6d0 !important;
+    font-family: Arial, sans-serif;
+}
+
+/* Login Box Styles */
+.login-box {
+    background-color: #a1c09d;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.login-box input {
+    background: #edeaea !important;
+}
+
+.login-box input:focus {
+    background: white !important;
+}
+
+.login-box h1 {
+    font-family: 'Cinzel Decorative', serif !important;
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    color: #333 !important;
+}
+
+.form-control {
+    border-radius: 25px;
+    padding: 10px 20px;
+}
+
+/* Button Styles */
+.btn-login {
+    background-color: #3b2b2b !important;
+    color: #fff !important;
+    border-radius: 25px;
+    padding: 12px 20px;
+    font-weight: 500;
+}
+
+.btn-login:hover {
+    background-color: #1f1313 !important;
+}
+
+/* Search Form Styles */
+.form-inline {
+    display: flex;
+    justify-content: center;
+}
+
+.search-input {
+    width: 300px;
+    background-color: #fff4ec;
+    margin-right: 10px;
+    height: 45px;
+    padding-left: 2.5rem; /* Space for the icon */
+}
+
+.search-input:focus {
+    background-color: white;
+}
+
+.search-icon {
+    position: relative;
+    top: 10px;
+    right: 49px;
+    color: #6c757d;
+}
+
+/* Navbar and Carousel Styles */
+.nav-link i {
+    color: black;
+    margin-left: 15px;
+}
+
+.navbar-nav .nav-item {
+    margin-left: 15px;
+}
+
+.carousel-item {
+    position: relative;
+    overflow: hidden;
+    height: 500px; /* Fixed height for the carousel */
+}
+
+.carousel-item img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: translate(-50%, -50%);
+}
+
+.carousel-caption {
+    bottom: 20px;
+    text-align: center;
+}
+
+/* Header Links */
+.header-links a {
+    color: black;
+    font-size: medium;
+    font-weight: 500;
+}
+
+/* Category Divs */
+.catdivs {
+    padding: 1.2%;
+}
+
+.catdivs:hover {
+    background-color: white;
+}
+
+/* Navigation Abouts */
+.nav-abouts a {
+    color: #caaa93;
+}
+
+.timer-container {
+    position: relative;
+}
+.timer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-size: 0.875rem;
+    font-weight: bold;
+    padding: 0.375rem 0.75rem;
+    background: transparent;
+    border: none;
+    cursor: default;
+    color: #413232; /* Red color for timer */
+    font-weight: bold;
+}
+.resend-btn {
+    display: none; /* Hidden initially */
+    margin-top: 1rem;
+}
+.disabled-button {
+    pointer-events: none;
+    opacity: 0.6;
+}

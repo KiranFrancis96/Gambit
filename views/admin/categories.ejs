@@ -1,0 +1,126 @@
+<%- include('../layout/admin_header.ejs') %>
+
+<section class="content-main">
+    <div class="content-header">
+        <h2 class="content-title">Category</h2>
+        <div>
+            <a href="/admin/category/add-category" class="btn btn-primary"><i class="material-icons md-plus"></i> Create new</a>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <header class="card-header">
+           
+        </header> 
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Ser No</th>
+                            <th>category</th>
+                            <th>List / Unlist</th>
+                            <th>Details</th>
+                            <th>Offers</th>
+                            <th class="text-center">Edit / Delete</th>  
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% categories.forEach(category => { %>
+                            
+                        <tr>
+                            <td><%= category._id %></td>
+                            <td> <div class="d-flex align-items-center">
+                                <img src="/imgs/categories/<%= category.image %>" alt="" class="img-xs me-2">
+                                <span><%= category.name %></span>
+                            </div>
+                            </td>
+                            
+                            <td>
+                                <% if(category.isListed) {%>
+                                <span class="badge rounded-pill alert-success">Listed</span>
+                                <% } if(!category.isListed) {%>
+                                <span class="badge rounded-pill alert-danger">Unlisted</span>
+                                <% } %>
+                            </td>
+                            <td><a href="/admin/category/details/<%= category._id %>" class="btn btn-sm btn-outline-primary">Details</a></td>
+                            <td><%= category.offer? category.offer.name : 'No Offer' %></td>
+                            <td class= "text-center">
+                                <a href="/admin/category/edit-category/<%= category._id %>" class="btn btn-outline-primary">
+                                    <i class="fas fa-edit"></i> 
+                                </a>
+                                <button class="btn <% if(category.isListed) {%> btn-outline-danger <% } if(category.isListed) {%> btn-outline-success<% } %>" onclick="confirmDelete('<%= category._id%>','<%= category.isListed %>')">
+                                    <i class="fas <% if(category.isListed) {%>fa-trash<% } if(!category.isListed) {%> fa-undo<% } %>"></i>
+                                </button>
+                                <form id="deleteForm<%= category._id %>" action="<% if(category.isListed) {%>/admin/category/unlist-category/<%= category._id %><% } if(!category.isListed) {%>/admin/category/relist-categroy/<%= category._id %><% } %>" method="post" style="display: none;">
+                                </form>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </div> <!-- card-body end// -->
+    </div> <!-- card end// -->
+    <!-- <div class="pagination-area mt-15 mb-50">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-start">
+                <li class="page-item active"><a class="page-link" href="#">01</a></li>
+                <li class="page-item"><a class="page-link" href="#">02</a></li>
+                <li class="page-item"><a class="page-link" href="#">03</a></li>
+                <li class="page-item"><a class="page-link dot" href="#">...</a></li>
+                <li class="page-item"><a class="page-link" href="#">16</a></li>
+                <li class="page-item"><a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a></li>
+            </ul>
+        </nav>
+    </div> -->
+</section> <!-- content-main end// -->
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function confirmDelete(categoryId, isListed) {
+        const action = isListed === 'true' ? 'delete' : 'restore';
+        Swal.fire({
+            title: `Are you sure you want to ${action} this category?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'No',
+            customClass: {
+                title: 'swal-title',
+                htmlContainer: 'swal-text',
+                confirmButton: 'swal-confirm-button',
+                cancelButton: 'swal-cancel-button',
+            },
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById(`deleteForm${categoryId}`).submit();
+            }
+        });
+    }
+</script>
+<style>
+    
+    .swal2-title, .swal2-html-container {
+        color: #333 !important; 
+    }
+    .swal2-confirm, .swal2-cancel {
+        color: #fff !important; 
+    }
+    .swal2-confirm {
+        background-color: #3085d6 !important; 
+    }
+    .swal2-cancel {
+        background-color: #d33 !important; 
+    }
+
+    .table td.text-center .btn {
+        margin: 2px;
+        padding: 6px 12px;
+        font-size: 14px;
+    }
+
+    .table th.text-center, .table td.text-center {
+        text-align: center;
+    }
+</style>
+<%- include('../layout/admin_footer.ejs') %>

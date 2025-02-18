@@ -1,0 +1,300 @@
+<%- include('../layout/admin_header.ejs') %>
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Dashboard</h2>
+            <p>Whole data about your business here</p>
+        </div>
+        <div>
+            <a href="/admin/dashboard/generateLedger" class="btn btn-primary"><i class="text-muted material-icons md-post_add"></i>Create report</a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-3">
+            <div class="card card-body mb-4">
+                <article class="icontext">
+                    <span class="icon icon-sm rounded-circle bg-primary-light"><i class="text-primary material-icons md-monetization_on"></i></span>
+                    <div class="text">
+                        <h6 class="mb-1 card-title">Total Revenue</h6>
+                        <span>₹<%= totalRevenue || 0.00 %></span>
+                    </div>
+                </article>
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <div class="card card-body mb-4">
+                <article class="icontext">
+                    <span class="icon icon-sm rounded-circle bg-success-light"><i class="text-success material-icons md-local_shipping"></i></span>
+                    <div class="text">
+                        <h6 class="mb-1 card-title">Total Orders</h6>
+                        <span><%= orderCount || 0 %></span>
+                    </div>
+                </article>
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <div class="card card-body mb-4">
+                <article class="icontext">
+                    <span class="icon icon-sm rounded-circle bg-warning-light"><i class="text-warning material-icons md-qr_code"></i></span>
+                    <div class="text">
+                        <h6 class="mb-1 card-title">Total Products</h6>
+                        <span><%= productCount || 0 %></span>
+                        <span class="text-sm">
+                            In <%= categoryCount || 0 %> Categories
+                        </span>
+                    </div>
+                </article>
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <div class="card card-body mb-4">
+                <article class="icontext">
+                    <span class="icon icon-sm rounded-circle bg-info-light"><i class="text-info material-icons md-shopping_basket"></i></span>
+                    <div class="text">
+                        <h6 class="mb-1 card-title">Total Users</h6>
+                        <span><%= userCount %></span>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xl-8 col-lg-12">
+            <div class="card mb-4">
+                <article class="card-body">
+                    <div class="btn-group mb-3" role="group">
+                        <button id="dailyBtn" class="btn btn-primary">Daily</button>
+                        <button id="weeklyBtn" class="btn btn-secondary">Weekly</button>
+                        <button id="monthlyBtn" class="btn btn-secondary">Monthly</button>
+                        <button id="yearlyBtn" class="btn btn-secondary">Yearly</button>
+                    </div>                                                   
+                    <h5 class="card-title">Sale Statistics</h5>
+                    <canvas id="myChart" height="120px"></canvas>
+                </article>
+            </div>
+        </div>
+        <div class="col-xl-4 col-lg-12">
+            <div class="card mb-4">
+                <article class="card-body">
+                    <h5 class="card-title">Revenue Statistics</h5>
+                    <div class="mb-3">
+                        <p class="mb-0" >Daily Revenue: ₹ <%= dailyRevenue %></p>
+                        <p class="mb-0" >Weekly Revenue: ₹<%= weeklyRevenue %> </p>
+                        <p class="mb-0" >Monthly Revenue: ₹<%= monthlyRevenue %></p>
+                    </div>
+                </article>
+            </div>        
+        </div>
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card mb-4">
+                    <article class="card-body">
+                        <h5 class="card-title">Best Selling Products</h5>
+                        <ul class="list-unstyled mb-0">
+                            <% bestSellingProducts.forEach((product, index) => { %>
+                                <li>
+                                    <strong class="index-number"><%= index + 1 %></strong>
+                                    <img src="/imgs/products/<%= product.product_images[0] %>" width="70" height="70"> 
+                                    <%= product.product_name %>
+                                </li>
+                            <% }); %>
+                        </ul>                            
+                    </article>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card mb-4">
+                    <article class="card-body">
+                        <h5 class="card-title">Best Selling Categories</h5>
+                        <ul class="list-unstyled mb-0">
+                            <% bestCategories.forEach((category, index) => { %>
+                                <li>
+                                    <strong class="index-number"><%= index + 1 %></strong>
+                                    <img src="/imgs/categories/<%= category.image %>" width="70" height="70"> 
+                                    <%= category.name %>
+                                </li>
+                            <% }); %>
+                        </ul>
+                    </article>
+                </div>
+            </div>
+        </div>  
+    </div>
+    <!-- <div class="card mb-4">
+        <header class="card-header">
+            <h4 class="card-title">Latest orders</h4>
+        </header>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>User</th>
+                            <th>Total Amount</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div> -->
+</section>
+<%- include('../layout/admin_footer.ejs') %>
+<style>
+    .index-number {
+        display: inline-block;
+        width: 30px; /* Adjust the width as needed */
+        text-align: center; /* Center align the number */
+        background-color: #f0f0f0; /* Background color for visibility */
+        border-radius: 50%; /* Make it circular */
+        font-weight: bold; /* Make it bold */
+        color: #333; /* Text color */
+        margin-right: 10px; /* Space between the number and image */
+    }
+    
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', async function() {
+        fetchReport('day');
+
+        async function fetchReport(period) { 
+            try {
+                const response = await fetch(`/admin/dashboard/fetchReport?period=${period}`);
+                if (!response.ok) throw new Error(response.statusText);
+                const data = await response.json();
+                if (!data.success) throw new Error(data.message);
+                console.log(data);
+                updateChart(data?.reportData?.orders, period);
+                updateButtonStyles(period); 
+            } catch (error) {
+                console.error('Error fetching report:', error);
+            }
+        }
+
+        function updateButtonStyles(activePeriod) {
+            const buttons = {
+                day: 'dailyBtn',
+                week: 'weeklyBtn',
+                month: 'monthlyBtn',
+                year: 'yearlyBtn'
+            };
+
+            Object.keys(buttons).forEach(key => {
+                const button = document.getElementById(buttons[key]);
+                if (key === activePeriod) {
+                    button.classList.remove('btn-secondary');
+                    button.classList.add('btn-primary');
+                } else {
+                    button.classList.remove('btn-primary');
+                    button.classList.add('btn-secondary');
+                }
+            });
+        }
+
+        function updateChart(data, period) {
+            const salesData = [];
+            const orderCountData = [];
+            let labels = [];
+
+            if (period === 'day') {
+                labels = Array.from({ length: 24 }, (_, i) => `${String(i).padStart(2, '0')}:00`);
+                salesData.length = 24;
+                orderCountData.length = 24;
+                salesData.fill(0);
+                orderCountData.fill(0);
+
+                data.forEach(order => {
+                    const orderHour = new Date(order.orderDate).getHours();
+                    salesData[orderHour] += order.totalAmount;
+                    orderCountData[orderHour] += 1;
+                });
+
+            } else if (period === 'week') {
+                labels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                salesData.length = 7;
+                orderCountData.length = 7;
+                salesData.fill(0);
+                orderCountData.fill(0);
+
+                data.forEach(order => {
+                    const orderDay = new Date(order.orderDate).getDay();
+                    salesData[orderDay] += order.totalAmount;
+                    orderCountData[orderDay] += 1;
+                });
+
+            } else if (period === 'month') {
+                const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+                labels = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+                salesData.length = daysInMonth;
+                orderCountData.length = daysInMonth;
+                salesData.fill(0);
+                orderCountData.fill(0);
+
+                data.forEach(order => {
+                    const orderDate = new Date(order.orderDate);
+                    salesData[orderDate.getDate() - 1] += order.totalAmount;
+                    orderCountData[orderDate.getDate() - 1] += 1;
+                });
+
+            } else if (period === 'year') {
+                labels = Array.from({ length: 12 }, (_, i) => new Date(0, i).toLocaleString('default', { month: 'short' }));
+                salesData.length = 12;
+                orderCountData.length = 12;
+                salesData.fill(0);
+                orderCountData.fill(0);
+
+                data.forEach(order => {
+                    const orderMonth = new Date(order.orderDate).getMonth();
+                    salesData[orderMonth] += order.totalAmount;
+                    orderCountData[orderMonth] += 1;
+                });
+            }
+
+            console.log('Sales Data:', salesData);
+            console.log('Order Count Data:', orderCountData);
+        
+            const ctx = document.getElementById('myChart').getContext('2d');
+            if (ctx.chart) {
+                ctx.chart.destroy();
+            }
+
+            ctx.chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Sales',
+                        data: salesData,
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }, {
+                        label: 'Orders',
+                        data: orderCountData,
+                        borderColor: 'rgb(255, 99, 132)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });   
+        }
+        
+        // Attach event listeners for buttons
+        document.getElementById('dailyBtn').addEventListener('click', () => fetchReport('day'));
+        document.getElementById('weeklyBtn').addEventListener('click', () => fetchReport('week'));
+        document.getElementById('monthlyBtn').addEventListener('click', () => fetchReport('month'));
+        document.getElementById('yearlyBtn').addEventListener('click', () => fetchReport('year'));
+    });
+</script>

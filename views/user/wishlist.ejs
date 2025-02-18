@@ -1,0 +1,78 @@
+<%- include('../layout/user_header.ejs') %>
+
+<div class="container mt-5" id="mainContainer">
+    <div class="row">
+        <% if (!wishlist || !wishlist.products || wishlist.products.length === 0) { %>
+            <div class="col-12 text-center wishlistEmptyMessage" style="margin-top: 60px;">
+                <h2>Your wishlist is empty!</h2>
+                <p>Add items to it now.</p>
+                <a href="/shop" class="btn btn-primary">Shop now</a>
+            </div>
+        <% } else { %>
+            <div class="container my-5">
+                <h1 class="text-center mb-4">Your Wishlist</h1>
+
+                <div class="list-group">
+                    <!-- Wishlist Items -->
+                    <% wishlist.products.forEach(function(product) { %>
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <img src="/imgs/products/<%= product.product_images[0] %>" width="15%" class="mr-3" alt="Product Image">
+                                    <div>
+                                        <h5 class="mb-1"><%= product.product_name %></h5>
+                                        <p class="mb-1">Price: $<%= product.product_sale_price.toFixed(2) %></p>
+                                        <% if (product.offerType == 'product') { %>
+                                            <p class="mb-1">offer Price: $<%= product.offerPrice.toFixed(2) %></p>
+                                            <p class="mb-1 text-success">Offer: <%= product.offer.discountPercentage %>% Off</p>
+                                            <p class="mb-1">Offer Valid Until: <%= product.offer.expiryDate.toDateString() %></p>
+                                        <% }else if(product.offerType == 'category') {%>
+                                            <p class="mb-1">offer Price: $<%= product.offerPrice.toFixed(2) %></p>
+                                            <p class="mb-1 text-success">Offer: <%= product.product_category.offer.discountPercentage %>% Off</p>
+                                            <p class="mb-1">Offer Valid Until: <%= product.product_category.offer.expiryDate.toDateString() %></p>
+                                        <% } %>
+                                        <p class="mb-1">Quantity: <%= product.product_quantity %></p>
+                                    </div>
+                                </div>
+                                <div class="ml-auto">
+                                    <a href="/product-details/<%= product._id %>" class="btn btn-primary btn-sm">View Product</a>
+                                    <button class="btn btn-danger btn-sm ml-2" onclick="removeFromWishList('<%= product._id %>', this)">Remove</button>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+                <div class="text-center mt-4">
+                    <a href="/shop" class="btn btn-secondary">Continue Shopping</a>
+                </div>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<script>
+    async function removeFromWishList(productId, button) {
+        try {
+            const response = await fetch(`/wishlist/remove`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId })
+            });
+
+            const data = await response.json();
+            if (!data.success) throw new Error(data.message || 'Response error');
+
+            const productElement = button.closest('.list-group-item');
+            if (productElement) {
+                productElement.remove();
+            }
+
+            swal.fire('Success', 'Item removed from wishlist', 'success');
+
+        } catch (err) {
+            swal.fire('Error', err.message || 'Error processing wishlist', 'error');
+        }
+    }
+</script>
+
+<%- include('../layout/user_footer.ejs') %>

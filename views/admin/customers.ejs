@@ -1,0 +1,129 @@
+<%- include('../layout/admin_header.ejs') %>
+<section class="content-main">
+    <div class="content-header">
+        <h2 class="content-title">Users list</h2>
+    </div>
+    <div class="card mb-4">
+        <header class="card-header">
+        </header>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Phone No</th>
+                            <th>Status</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% users.forEach(user => { %>
+                        <tr>
+                            <td width="15%">
+                                <a href="#" class="itemside">
+                                    <div class="info pl-3">
+                                        <%= user._id %>
+                                    </div>
+                                </a>
+                            </td>
+                            <td><%= user.name %></td>
+                            <td><%= user.email %></td>
+                            <td><%= user.mobile %></td>
+                            <td>
+                                <% if(user.block) { %>
+                                <span class="badge rounded-pill alert-danger">Inactive</span>
+                                <% } else { %>
+                                <span class="badge rounded-pill alert-success">Active</span>
+                                <% } %>
+                            </td>
+                            <td class="text-end">
+                                <form 
+                                    action="<%= user.block ? '/admin/customers/unblock/' + user._id : '/admin/customers/block/' + user._id %>" 
+                                    method="post" 
+                                    onsubmit="return confirm('<%= user.block ? 'Are you sure you want to restore this user?' : 'Are you sure you want to block this user?' %>');">
+                                    <button type="submit" class="btn btn-sm <%= user.block ? 'btn-success' : 'btn-danger' %> rounded font-sm mt-15">
+                                        <%= user.block ? 'Restore' : 'Block' %>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pagination Controls -->
+    <div class="pagination-area mt-15 mb-50">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-start">
+                <% if (currentPage > 1) { %>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=<%= currentPage - 1 %>"><</a>
+                    </li>
+                <% } %>
+                <% for (let i = 1; i <= totalPages; i++) { %>
+                    <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                        <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                    </li>
+                <% } %>
+                <% if (currentPage < totalPages) { %>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=<%= currentPage + 1 %>">></a>
+                    </li>
+                <% } %>
+            </ul>
+        </nav>
+    </div>
+</section>
+
+<%- include('../layout/admin_footer.ejs') %>
+
+
+<script>
+    $(document).ready(function() {
+        $("#searchInput").autocomplete({
+            source: async function(request, response) {
+                try {
+                    const res = await fetch(`/admin/customers?query=${encodeURIComponent(request.term)}`);
+                    const data = await res.json();
+                    if (data.success) {
+                        const suggestions = data.suggestions.map(suggestion => ({
+                            label: suggestion.name,
+                            value: suggestion.id
+                        }));
+                        response(suggestions)
+                    } else {
+                        response([]);
+                    }
+                } catch (err) {
+                    console.log(err);
+                    response([]);
+                }
+            },
+
+            select: function(event, ui) {
+     
+                window.location.href = `/product-details/${ui.item.value}`;
+            }
+
+        });
+
+    })
+    async function search(){
+        try{
+            event.preventDefault()
+            event.stopPropagation()
+            const query = document.getElementById('searchInput').value
+            if(query){
+                window.location.href = `/shop?search=${encodeURIComponent(query)}`
+            }
+        }catch(error){
+            console.error(error);
+        }
+    }
+</script>

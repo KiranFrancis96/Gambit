@@ -1,0 +1,86 @@
+<%- include('../layout/admin_header.ejs') %>
+
+
+    <section class="content-main">
+   
+        <div class="card mb-4">
+            <header class="card-header">
+                <div class="row gx-3">
+                    <div class="col-lg-4 col-md-6 me-auto">
+                        <input type="text" placeholder="Search..." class="form-control">
+                    </div>
+                    <div class="col-lg-2 col-6 col-md-3">
+                        <select class="form-select">
+                            <option>Status</option>
+                            <option>Initiated</option>
+                            <option>Approved</option>
+                            <option>Rejected</option>
+                            <option>Cancelled</option>
+                        </select>
+                    </div>
+                </div>
+            </header>
+            <!-- table content starts -->
+            <div class="card-body">
+                <div class="table-responsive">
+                    <% if (returnList.length > 0 ) { %>
+
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">Email</th>
+                                <th scope="col">Customer Name</th>
+                                <th scope="col">Order</th>
+                                <th scope="col">Product</th>
+                                <th scope="col">Product Refund Amount</th>
+                                <th scope="col">Product Return Reason</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Date</th>
+                                <th scope="col" class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% returnList.forEach(returns => { %>
+                                <tr>
+                                    <td><%= returns.order?.user?.email %></td>
+                                    <td><b><%= returns.order?.user?.name %></b></td>
+                                    <td><a href="/admin/orders/orderDetails/<%= returns.order._id %>"><%= returns.order._id %></a></td>
+                                    <td><a href="/admin/productdetail/<%= returns.product._id %>"><%= returns.product.product_name %></a></td>
+                                    <td><%= returns.productRefundAmount %></td>
+                                    <td><%= returns.productReturnReason %></td>
+                                    <td id="statusUpdate<%= returns._id %>"><span class="badge rounded-pill alert-warning"><%= returns.returnProductStatus %></span></td>
+                                    <td><%= new Date(returns.productReturnDate).toLocaleString() %></td>
+                                    <td id="statusContainer<%= returns._id %>">
+                                        <% if (returns.returnProductStatus === "returnApproved") { %>
+                                            <p style="width: 240px; text-align: center;">Return approved</p>
+                                        <% } else if (returns.returnProductStatus === "returnRejected") { %>
+                                            <p style="width: 240px; text-align: center;">Return rejected</p>
+                                        <% } else { %>
+                                            <div id="buttonsContainer<%= returns._id %>" style="display: inline-flex; gap: 5px; width: 100%;">
+                                                <a class="btn btn-md rounded font-sm btn-success" 
+                                                   style="background-color: #28a745; border-color: #28a745; flex: 1; text-align: center; width: 120px;" 
+                                                   href="/admin/orders/return-status-change?accept=true&&return=<%= returns._id %>">
+                                                   Approve
+                                                </a>
+                                                <a class="btn btn-md rounded font-sm btn-danger" 
+                                                   style="background-color: #dc3545; border-color: #dc3545; flex: 1; text-align: center; width: 120px;" 
+                                                   href="/admin/orders/return-status-change?accept=false&&return=<%= returns._id %>">
+                                                   Reject
+                                                </a>
+                                            </div>
+                                        <% } %>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                    <% } else { %>
+                        <p class="text-center">No returned products to show</p>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </section> 
+
+
+<%- include('../layout/admin_footer.ejs') %>

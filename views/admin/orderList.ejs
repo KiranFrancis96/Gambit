@@ -1,0 +1,117 @@
+<%- include('../layout/admin_header.ejs') %>
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Orders List</h2>
+            <p>Dashboard > Order list</p>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <header class="card-header">
+            <div class="row gx-3">
+                <div class="col-lg-2 col-6 col-md-3">
+                    <select class="form-select">
+                        <option>Status</option>
+                        <option>Pending</option>
+                        <option>Shipped</option>
+                        <option>Delivered</option>
+                        <option>Cancelled</option>
+                    </select>
+                </div>
+            </div>
+        </header>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>#ID</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Shipping Address</th>
+                            <th scope="col">Total</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Date</th>
+                            <th scope="col" class="text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <% if(orderData.length > 0) { %>
+                        <tbody>
+                            <% orderData.forEach(order => { %>
+                            <tr>
+                                <td><%= order._id %></td>
+                                <td><b><%= order.user.name %></b></td>
+                                <td><%= order.user.email %></td>
+                                <td>
+                                    <%= order.shippingAddress.fullname %><br>
+                                    <%= order.shippingAddress.phone %><br>
+                                    <%= order.shippingAddress.city %>, <%= order.shippingAddress.Address %>, <%= order.shippingAddress.state %> - <%= order.shippingAddress.pincode %><br>
+                                </td>
+                                <td>Rs <%= order.totalAmount %></td>
+                                <td>
+                                    <span class="badge rounded-pill 
+                                        <% if (order.orderStatus === 'pending') { %>
+                                            alert-warning
+                                        <% } else if (order.orderStatus === 'shipped') { %>
+                                            alert-info
+                                        <% } else if (order.orderStatus === 'delivered') { %>
+                                            alert-success
+                                        <% } else if (order.orderStatus === 'cancelled') { %>
+                                            alert-danger
+                                        <% } else { %>
+                                            alert-secondary
+                                        <% } %>
+                                    ">
+                                    <%= order.orderStatus.replace(/([a-z])([A-Z])/g, '$1 $2')
+                                    .split(' ')
+                                    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                                    .join(' ') %>
+                                    </span>
+                                </td>
+                                <td><%= new Date(order.orderDate).toLocaleString() %></td>
+                                <td class="text-end">
+                                    <a href="/admin/orders/orderDetails/<%= order._id %>" class="btn btn-md rounded font-sm">Detail</a>
+                                </td>
+                            </tr>
+                            <% }); %>
+                        </tbody>
+                    <% } else { %>
+                        <tbody>
+                            <tr>
+                                <td colspan="8">
+                                    <h3>No orders listed</h3>
+                                </td>
+                            </tr>
+                        </tbody>
+                    <% } %>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="pagination-area mt-15 mb-50">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-start">
+                <% if (currentPage > 1) { %>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=<%= currentPage - 1 %>"><</a>
+                    </li>
+                <% } %>
+                <% for (let i = 1; i <= totalPages; i++) { %>
+                    <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                        <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                    </li>
+                <% } %>
+                <% if (currentPage < totalPages) { %>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=<%= currentPage + 1 %>">></a>
+                    </li>
+                <% } %>
+            </ul>
+        </nav>
+    </div>
+</section>
+
+<%- include('../layout/admin_footer.ejs') %>

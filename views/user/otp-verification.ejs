@@ -1,0 +1,191 @@
+<%- include('../layout/user_header.ejs') %>
+<!-- OTP Verification -->
+<div class="container d-flex justify-content-center align-items-center min-vh-100">
+    <div class="login-box p-4" style="box-shadow: 3px 3px #ececec; border: 1px solid #e5dcdc; border-radius: 10px;">
+        <h1 class="text-center mb-4">OTP Verification</h1>
+        <% if(locals.success){ %>
+            <span style="color: green;"><%= success%></span>
+        <% } else if(locals.fail){ %>
+            <span style="color: red;"><%= fail%></span>
+        <% } %>
+
+        <form id="otp-verification-form" >
+            <div class="form-group">
+                <label for="otp">Enter OTP</label>
+                <input type="text" class="form-control" id="otpInput" name="otp" placeholder="Enter the OTP sent to your email" required>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-2">
+                <span id="otp-timer" class="text-muted"></span>
+                <button type="button" id="resend-otp-btn" class="btn btn-outline-dark" style="font-size: 0.9rem;" disabled>Resend OTP</button>
+            </div>
+
+            <div class="text-center mt-4">
+                <button type="submit" onclick="otpVerify(event)" class="btn btn-dark btn-login rounded-pill">VERIFY OTP</button>
+            </div>
+
+            <div class="text-center mt-3">
+                <a href="/" class="text-dark">Back to login page</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+const TIMER_DURATION = 10;
+
+function startOtpTimer(timerElementId, resendButtonId) {
+    const timerDisplay = document.getElementById(timerElementId);
+    const resendButton = document.getElementById(resendButtonId);
+    let timeLeft = TIMER_DURATION;
+
+    function updateTimer() {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        timerDisplay.textContent = `Resend OTP in ${minutes}m ${seconds}s`;
+
+        if (timeLeft <= 0) {
+            timerDisplay.textContent = ''; 
+            resendButton.style.display = 'inline-block'; 
+            resendButton.disabled = false; 
+        } else {
+            timeLeft -= 1;
+            setTimeout(updateTimer, 1000);
+        }
+    }
+
+    resendButton.disabled = true;
+    updateTimer();
+}
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById('otp-verification-form')) {
+        startOtpTimer('otp-timer', 'resend-otp-btn');
+    }
+
+    const resendOtpButton = document.getElementById('resend-otp-btn');
+    if (resendOtpButton) {
+        resendOtpButton.addEventListener('click', async function(event) {
+            event.stopPropagation();
+            event.preventDefault();
+            if (!resendOtpButton.disabled) {
+                startOtpTimer('otp-timer', 'resend-otp-btn');
+                
+                try {
+
+                    Swal.fire({
+                        title: 'Sending OTP...',
+                        text: 'Please wait while we resend the OTP.',
+                        icon: 'info',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        willClose: () => {
+
+                        }
+                    });
+
+                    const response = await fetch('/resendOtp', {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    const data = await response.json();
+
+
+                    Swal.close();
+
+                    if (!data.success) throw new Error(data.message || 'Something went wrong, please try again later');
+
+
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: data.message || 'OTP sent successfully!',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        customClass: {
+                            popup: 'colored-toast'
+                        }
+                    });
+                
+                } catch (err) {
+
+                    Swal.close();
+
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'error',
+                        title: err.message || 'Something went wrong, please try again later',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                        customClass: {
+                            popup: 'colored-toast'
+                        }
+                    });
+                }
+            }
+        });
+    }
+});
+
+
+async function otpVerify(event){
+    event.preventDefault()
+    event.stopPropagation()
+    const otp = document.getElementById('otpInput').value
+    console.log('otp:',otp)
+    if(!otp){
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'error',
+            title: 'please Enter the otp',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            customClass: {
+                popup: 'colored-toast'
+            }
+        });
+    }
+    try{
+        const response = await fetch('/verify-otp',{
+            method:'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body:JSON.stringify({otp})
+        })
+        const data = await response.json()
+        if(!data.success) throw new Error(data.message||'Something went wrong please try again later')
+        Swal.fire({
+            icon: 'success',
+            title: data.message || 'OTP Verified Successfully',
+            showConfirmButton: true,
+            confirmButtonText: 'Go to Login',
+            customClass: {
+                popup: 'colored-toast'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = '/login';
+            }
+        });
+        
+    }catch(err){
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'error',
+            title: err||'Something went wrong please try again later',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            customClass: {
+                popup: 'colored-toast'
+            }
+        });
+    }
+}
+</script>
+<%- include('../layout/user_footer.ejs') %>

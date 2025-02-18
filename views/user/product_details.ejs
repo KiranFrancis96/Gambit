@@ -1,0 +1,575 @@
+<%- include('../layout/user_header.ejs') %>
+    
+        <div class="page-header breadcrumb-wrap">
+            <div class="container">
+                <div class="breadcrumb">
+                    <a href="/home" rel="nofollow">Home</a>
+                    <span></span><a href="/shop">shop</a>
+                    </a> <span></span> Product Details</a>
+                </div>
+            </div>
+        </div>
+        <div class="mobile-header-active mobile-header-wrapper-style">
+            <div class="mobile-header-wrapper-inner">
+                <div class="mobile-header-top">
+                    <div class="mobile-header-logo">
+                        <a href="index.html"><img src="assets/imgs/theme/logo.svg" alt="logo"></a>
+                    </div>
+                    <div class="mobile-menu-close close-style-wrap close-style-position-inherit">
+                        <button class="close-style search-close">
+                            <i class="icon-top"></i>
+                            <i class="icon-bottom"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="mobile-header-content-area">
+                    <div class="mobile-search search-style-3 mobile-header-border">
+                        <form action="#">
+                            <input type="text" placeholder="Search for items…">
+                            <button type="submit"><i class="fi-rs-search"></i></button>
+                        </form>
+                    </div>
+
+
+                    <div class="mobile-social-icon">
+                        <h5 class="mb-15 text-grey-4">Follow Us</h5>
+                        <a href="#"><img src="assets/imgs/theme/icons/icon-facebook.svg" alt=""></a>
+                        <a href="#"><img src="assets/imgs/theme/icons/icon-twitter.svg" alt=""></a>
+                        <a href="#"><img src="assets/imgs/theme/icons/icon-instagram.svg" alt=""></a>
+                        <a href="#"><img src="assets/imgs/theme/icons/icon-pinterest.svg" alt=""></a>
+                        <a href="#"><img src="assets/imgs/theme/icons/icon-youtube.svg" alt=""></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+                  
+        <!-- mainview -->
+        <main class="main">
+            <section class="mt-50 mb-50">
+                <div class="container">
+                    <div class="row d-flex justify-content-center">
+                        <div class="col-lg-9">
+                            <div class="product-detail accordion-detail">
+                                <div class="row mb-50">
+                                    <div class="col-md-6 col-sm-12">
+                                        <div class="detail-gallery">
+                                            <% if (product && product.product_images && product.product_images.length > 0) { %>
+                                                <div class="row">
+                                                    <div class="col-md-12 mb-3" id="imagezoomjquery">
+                                                            <img src="/imgs/products/<%= product.product_images[0] %>"
+                                                            data-zoom-image="/imgs/products/<%= product.product_images[0] %>"
+                                                            class="img-fluid main-image" alt="product image">
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <% for (let i = 0; i < Math.min(product.product_images.length, 4); i++) { %>
+                                                        <div class="col-md-3 col-sm-3 col-3 mb-3 d-flex justify-content-center" >
+                                                                <img src="/imgs/products/<%= product.product_images[i] %>"
+                                                                class="img-fluid thumbnail" data-zoom-image="/imgs/products/<%= product.product_images[i] %>" alt="product thumbnail"
+                                                                onclick="changeMainImage('/imgs/products/<%= product.product_images[i] %>')">
+                                                        </div>
+                                                    <% } %>
+                                                </div>
+                                            <% } else { %>
+                                                <p>No images available.</p>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6 col-sm-12 col-xs-12">
+                                        <div class="detail-info">
+                                            <h3 class="title-detail">
+                                                <%= product.product_name %>
+                                            </h3>
+                                            <div class="product-detail-rating">
+                                                <div class="pro-details-brand">
+                                                    <h4><span> Brand: <a href="#">
+                                                                <%= product.product_brand%>
+                                                            </a></span></h4>
+                                                </div>
+                                                <div class="product-rate-cover text-end">
+                                                    <div class="product-rate d-inline-block">
+                                                        <div class="product-rating" style="width:90%">
+                                                        </div>
+                                                    </div>
+                                                    <span class="font-small ml-5 text-muted"> </span>
+                                                </div>
+                                            </div>
+                                            <div class="clearfix product-price-cover">
+                                                <% 
+                                                const productOfferExpired = product.offerType == 'product' && product.offer?.expiryDate < Date.now();
+                                                const categoryOfferExpired = product.offerType == 'category' && product.product_category?.offer?.expiryDate < Date.now();
+                                            
+                                                if (productOfferExpired || categoryOfferExpired) { 
+                                            %>
+                                                <div class="product-price primary-color float-left">
+                                                    <ins><span class="text-brand">₹ <%= product.product_sale_price %></span></ins>
+                                                    <% if (product.product_regular_price !== product.product_sale_price) { %>
+                                                        <ins><span class="old-price font-md ml-15">₹<%= product.product_regular_price %></span></ins>
+                                                    <% } %>
+                                                </div>
+                                            <% 
+                                                } else if (product.offerPrice) { 
+                                            %>
+                                                <div class="product-price primary-color float-left">
+                                                    <ins><span class="text-brand">₹ <%= product.offerPrice %></span></ins>
+                                                    <ins><span class="old-price font-md ml-15">₹ <%= product.product_sale_price %></span></ins>
+                                            
+                                                    <% if (product.offerType === 'product' && product.offer?.expiryDate >= Date.now()) { %>
+                                                        <ins><span class="text-danger ms-2 p-0 font-md"><%= product.offer?.discountPercentage %>% off</span></ins>
+                                                    <% } else if (product.offerType === 'category' && product.product_category?.offer?.expiryDate >= Date.now()) { %>
+                                                        <ins><span class="text-danger ms-2 p-0 font-md"><%= product.product_category?.offer?.discountPercentage %>% off</span></ins>
+                                                    <% } %>
+                                                </div>
+                                            <% } %>
+                                            
+
+                                            </div>
+                                            <div class="bt-1 border-color-1 mt-15 mb-15"></div>
+                                            <div class="short-desc mb-30">
+                                                <p>
+                                                    <%= product.product_description %>
+                                                </p>
+                                            </div>
+
+
+                                            <div class="bt-1 border-color-1 mt-30 mb-30"></div>
+                                            <div class="detail-extralink"
+                                                style="display: flex; justify-content: center ; align-items: center;">
+
+                                                <% if (product?.isActive === false || product.product_category?.isListed === false || product.product_quantity <= 0) { %>
+                                                    <h4>
+                                                        <div class="product-unavailable" style="color: red;">
+                                                            Currently Unavailable
+                                                        </div>
+                                                    </h4>
+                                                <% } else { %>
+                                                    <div class="product-extra-link2">
+                                                      
+                                                        <% if (productIds && productIds.includes(product._id.toString())) { %>
+                                                            <form action="/cart" method="get">
+                                                                <button type="submit" id="goToCart" class="button button-add-to-cart">Go to Cart</button>
+                                                            </form>
+                                                        <% } else { %>
+                                                            <form action="/addtoCart" method="post">
+                                                                <input type="hidden" name="offerType" value="<%= product.offerType %>">
+                                                                <input type="hidden" name="offerPrice" value="<%= product.offerPrice %>">
+                                                                <input type="hidden" name="product" value="<%= product._id %>">
+                                                                <input type="hidden" name="ogprice" value="<%= product.product_regular_price %>">
+                                                                <input type="hidden" name="price" value="<%= product.product_sale_price %>">
+                                                                <button type="submit" id="addToCart" class="button button-add-to-cart">Add to Cart</button>
+                                                            </form>
+                                                        <% } %>
+                                                    </div>
+                                                    
+                                                    <!-- <div class="product-extra-link2">
+                                                        <button type="submit" class="button button-add-to-cart" id="buyNow" style="margin-left: 10px;">Buy Now</button>
+                                                    </div> -->
+                                                <% } %>
+                                                
+                                                    
+                                                            <!-- <div class="product-extra-link2" style="margin-left: 10px;">
+                                                                <a aria-label="Remove From Wishlist" class="wishlist-link" data-product-id="">
+                                                                    <i class="fi-rs-heart" style="color: #f00;" ></i>
+                                                                </a>
+                                                            </div> -->
+                                                        
+                                                            <!-- <div class="product-extra-link2" style="margin-left: 10px;">
+                                                                <a aria-label="Add To Wishlist" class="wishlist-link" data-product-id="">
+                                                                    <i class="fi-rs-heart" ></i>
+                                                                </a>
+                                                            </div>
+                                                         -->
+                                                    
+                                            </div>
+
+                                            <ul class="product-meta font-xs color-grey mt-50">
+
+
+
+                                                <% if (product.product_quantity==0) { %>
+
+                                                    <li>Availability: <span class="in-stock text-danger ml-5">Out of
+                                                            stock</span></li>
+
+                                                    <% } else if(product.isActive) { %>
+                                                        <% if(product.product_quantity > 5) {%>
+                                                        <li>Availability: <span class="in-stock text-success ml-5">
+                                                                <%= product.product_quantity %> Items In Stock
+                                                            </span></li>
+                                                            <%} if(product.product_quantity<=5) {%>
+                                                                <li>Availability: <span class="in-stock text-danger ml-5">
+                                                                    <%= product.product_quantity %> Items In Stock
+                                                                </span></li>
+                                                                <% } %>
+
+                                                        <% }else if(!product.isActive) {%>
+                                                            <li>Availability: <span class=" ml-5">
+                                                                Unavailable
+                                                            </span></li>
+                                                            <% } %>
+
+                                            </ul>
+                                        </div>
+                                        <!-- Detail Info -->
+                                    </div>
+
+                                </div>
+
+
+                                <div class="tab-style3">
+                                    <ul class="nav nav-tabs text-uppercase">
+                                        <li class="nav-item">
+                                            <a class="nav-link" id="Additional-info-tab" data-bs-toggle="tab"
+                                                href="#Additional-info">Additional info</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" id="Reviews-tab" data-bs-toggle="tab"
+                                                href="#Reviews">Reviews </a>
+                                        </li>
+                                    </ul>
+
+
+                                    <div class="tab-content shop_info_tab entry-main-content">
+
+                                        <!-- Additional info section starts -->
+                                        <div class="tab-pane fade" id="Additional-info">
+                                            <p><%= product.product_description %></p>
+                                            <!-- <table class="font-md">
+                                                <tbody>
+                                                    <tr class="stand-up">
+                                                        <th>Display Type</th>
+                                                        <td>
+                                                            <p>
+                                                                
+                                                            </p>
+                                                        </td>
+                                                    </tr>
+                                                    <tr class="folded-wo-wheels">
+                                                        <th>Dial Shape</th>
+                                                        <td>
+                                                            <p>
+                                                                
+                                                            </p>
+                                                        </td>
+                                                    </tr>
+                                                    <tr class="folded-w-wheels">
+                                                        <th>Strap Material</th>
+                                                        <td>
+                                                            <p>
+                                                                
+                                                            </p>
+                                                        </td>
+                                                    </tr>
+                                                    <tr class="door-pass-through">
+                                                        <th>Strap Color</th>
+                                                        <td>
+                                                            <p>
+                                                                
+                                                            </p>
+                                                        </td>
+                                                    </tr>
+
+                                                </tbody>
+                                            </table> -->
+                                        </div>
+
+                                        <!-- Additional info section ends -->
+
+
+                                        <div class="tab-pane fade" id="Reviews">
+                                            <!--Comments-->
+                                            <div class="comments-area">
+                                                <div class="row">
+                                                    <div class="col-lg-8">
+                                                        <h4 class="mb-30">Customer questions & answers</h4>
+                                                        <div class="comment-list">
+                                                            <div class="single-comment justify-content-between d-flex">
+                                                                <div class="user justify-content-between d-flex">
+                                                                    <div class="thumb text-center">
+                                                                        <img src="assets/imgs/page/" alt="">
+                                                                        <h6><a href="#">Jacky Chan</a></h6>
+                                                                        <!-- <p class="font-xxs">Since 2012</p> -->
+                                                                    </div>
+                                                                    <div class="desc">
+                                                                        <div class="product-rate d-inline-block">
+                                                                            <div class="product-rating"
+                                                                                style="width:90%">
+                                                                            </div>
+                                                                        </div>
+                                                                        <p>Thank you very fast shipping from Poland only
+                                                                            3days.</p>
+                                                                        <div class="d-flex justify-content-between">
+                                                                            <div class="d-flex align-items-center">
+                                                                                <p class="font-xs mr-30">December 4,
+                                                                                    2020 at 3:12 pm </p>
+                                                                                <a href="#"
+                                                                                    class="text-brand btn-reply">Reply
+                                                                                    <i class="fi-rs-arrow-right"></i>
+                                                                                </a>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <!--single-comment -->
+                                                            <div class="single-comment justify-content-between d-flex">
+                                                                <div class="user justify-content-between d-flex">
+                                                                    <div class="thumb text-center">
+                                                                        <img src="assets/imgs/page/" alt="">
+                                                                        <h6><a href="#">Ana Rosie</a></h6>
+                                                                        <!-- <p class="font-xxs">Since 2008</p> -->
+                                                                    </div>
+                                                                    <div class="desc">
+                                                                        <div class="product-rate d-inline-block">
+                                                                            <div class="product-rating"
+                                                                                style="width:90%">
+                                                                            </div>
+                                                                        </div>
+                                                                        <p>Great low price and works well.</p>
+                                                                        <div class="d-flex justify-content-between">
+                                                                            <div class="d-flex align-items-center">
+                                                                                <p class="font-xs mr-30">December 4,
+                                                                                    2020 at 3:12 pm </p>
+                                                                                <a href="#"
+                                                                                    class="text-brand btn-reply">Reply
+                                                                                    <i class="fi-rs-arrow-right"></i>
+                                                                                </a>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <!--single-comment -->
+                                                            <div class="single-comment justify-content-between d-flex">
+                                                                <div class="user justify-content-between d-flex">
+                                                                    <div class="thumb text-center">
+                                                                        <img src="assets/imgs/page/" alt="">
+                                                                        <h6><a href="#">Steven Keny</a></h6>
+                                                                        <!-- <p class="font-xxs">Since 2010</p> -->
+                                                                    </div>
+                                                                    <div class="desc">
+                                                                        <div class="product-rate d-inline-block">
+                                                                            <div class="product-rating"
+                                                                                style="width:90%">
+                                                                            </div>
+                                                                        </div>
+                                                                        <p>Authentic and Beautiful, Love these way more
+                                                                            than ever expected They are Great earphones
+                                                                        </p>
+                                                                        <div class="d-flex justify-content-between">
+                                                                            <div class="d-flex align-items-center">
+                                                                                <p class="font-xs mr-30">December 4,
+                                                                                    2020 at 3:12 pm </p>
+                                                                                <a href="#"
+                                                                                    class="text-brand btn-reply">Reply
+                                                                                    <i class="fi-rs-arrow-right"></i>
+                                                                                </a>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+
+                                                            <!--star section starts -->
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-4">
+                                                        <h4 class="mb-30">Customer reviews</h4>
+                                                        <div class="d-flex mb-30">
+                                                            <div class="product-rate d-inline-block mr-15">
+                                                                <div class="product-rating" style="width:90%">
+                                                                </div>
+                                                            </div>
+                                                            <h6>4.8 out of 5</h6>
+                                                        </div>
+                                                        <div class="progress">
+                                                            <span>5 star</span>
+                                                            <div class="progress-bar" role="progressbar"
+                                                                style="width: 50%;" aria-valuenow="50" aria-valuemin="0"
+                                                                aria-valuemax="100">50%</div>
+                                                        </div>
+                                                        <div class="progress">
+                                                            <span>4 star</span>
+                                                            <div class="progress-bar" role="progressbar"
+                                                                style="width: 25%;" aria-valuenow="25" aria-valuemin="0"
+                                                                aria-valuemax="100">25%</div>
+                                                        </div>
+                                                        <div class="progress">
+                                                            <span>3 star</span>
+                                                            <div class="progress-bar" role="progressbar"
+                                                                style="width: 45%;" aria-valuenow="45" aria-valuemin="0"
+                                                                aria-valuemax="100">45%</div>
+                                                        </div>
+                                                        <div class="progress">
+                                                            <span>2 star</span>
+                                                            <div class="progress-bar" role="progressbar"
+                                                                style="width: 65%;" aria-valuenow="65" aria-valuemin="0"
+                                                                aria-valuemax="100">65%</div>
+                                                        </div>
+                                                        <div class="progress mb-30">
+                                                            <span>1 star</span>
+                                                            <div class="progress-bar" role="progressbar"
+                                                                style="width: 85%;" aria-valuenow="85" aria-valuemin="0"
+                                                                aria-valuemax="100">85%</div>
+                                                        </div>
+                                                        <a href="#" class="font-xs text-muted">How are ratings
+                                                            calculated?</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!--star section ends -->
+
+
+                                            <!--comment form starts-->
+                                            <div class="comment-form">
+                                                <h4 class="mb-15">Add a review</h4>
+                                                <div class="product-rate d-inline-block mb-30">
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-lg-8 col-md-12">
+                                                        <form class="form-contact comment_form" action="#"
+                                                            id="commentForm">
+                                                            <div class="row">
+                                                                <div class="col-12">
+                                                                    <div class="form-group">
+                                                                        <textarea class="form-control w-100"
+                                                                            name="comment" id="comment" cols="30"
+                                                                            rows="9"
+                                                                            placeholder="Write Comment"></textarea>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-sm-6">
+                                                                    <div class="form-group">
+                                                                        <input class="form-control" name="name"
+                                                                            id="name" type="text" placeholder="Name">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-sm-6">
+                                                                    <div class="form-group">
+                                                                        <input class="form-control" name="email"
+                                                                            id="email" type="email" placeholder="Email">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-12">
+                                                                    <div class="form-group">
+                                                                        <input class="form-control" name="website"
+                                                                            id="website" type="text"
+                                                                            placeholder="Website">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <button type="submit"
+                                                                    class="button button-contactForm">Submit
+                                                                    Review</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--comment form ends-->
+
+
+
+                                <!-- Related products section starts -->
+                                <div class="row mt-60">
+                                    <div class="col-12">
+                                        <h3 class="section-title style-1 mb-30">Related products</h3>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="row related-products">
+                                            <% if(relatedProducts.length>0) { %>
+                                                <% for (let i=0; i < relatedProducts.length; i++) { %>
+                                                    <div class="col-lg-3 col-md-4 col-12 col-sm-6">
+                                                        <div class="product-cart-wrap small hover-up">
+                                                            <div class="product-img-action-wrap">
+                                                                <div class="product-img product-img-zoom">
+                                                                    <a href="/product-details/<%= relatedProducts[i]._id %>"
+                                                                        tabindex="0">
+                                                                        <img class="default-img"
+                                                                            src="/imgs/products/<%= relatedProducts[i].product_images[0] %>"
+                                                                            alt="">
+                                                                        <img class="hover-img"
+                                                                            src="/imgs/products/<%= relatedProducts[i].product_images[0] %>"
+                                                                            alt="">
+                                                                    </a>
+                                                                </div>
+                                                                <div class="product-action-1">
+
+                                                                    <a aria-label="Add To Wishlist"
+                                                                        class="action-btn small hover-up" href="#"
+                                                                        tabindex="0"><i class="fi-rs-heart"></i></a>
+
+                                                                </div>
+
+                                                            </div>
+                                                            <div class="product-content-wrap">
+                                                                <h2><a href="/product-details/<%= relatedProducts[i]._id %>"
+                                                                        tabindex="0">
+                                                                        <%= relatedProducts[i].product_name %>
+                                                                    </a></h2>
+                                                                <div class="rating-result" title="90%">
+                                                                    <span>
+                                                                    </span>
+                                                                </div>
+                                                                <div class="product-price">
+                                                                    <%if(relatedProducts[i].isActive == false ||
+                                                                        relatedProducts[i].category?.isListed == false
+                                                                        ){%>
+
+                                                                        <span
+                                                                            style="color: red; font-size: 15px;">Currently
+                                                                            Unavailable</span>
+                                                                        <% } else { %>
+                                                                            <span> ₹ <%= relatedProducts[i].product_sale_price
+                                                                                    %></span>
+                                                                            <span class="old-price">
+                                                                                <%= relatedProducts[i].product_regular_price%>
+                                                                            </span>
+                                                                            <% } %>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <% } %>
+                                                        <% } else { %>
+                                                            <div class="col-12">
+                                                                <p>No Products Found Yet</p>
+                                                            </div>
+                                                            <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Related products section ends -->
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+        </main> 
+        
+<%- include('../layout/user_footer.ejs') %>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="/zoom-master/jquery.zoom.js"></script>
+
+<script>
+   
+    function changeMainImage(imageSrc) {
+      const mainImage = document.querySelector('.main-image');
+      mainImage.src = imageSrc;
+      mainImage.setAttribute('data-zoom-image', imageSrc);
+      $('#imagezoomjquery').trigger('zoom.destroy');
+      $('#imagezoomjquery').zoom({ magnify: 2 });
+    }
+    
+    $(document).ready(function() {
+      $('#imagezoomjquery').zoom({ magnify: 2 });
+    });
+    </script>
+    

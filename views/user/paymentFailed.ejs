@@ -1,0 +1,34 @@
+<%- include('../layout/user_header.ejs') %>
+
+<section class="pt-5 pb-5 main-section bg-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 text-center bg-white p-4 rounded shadow">
+                <img src="/imgs/theme/desktop_img_2be990.png" alt="" class="img-fluid mb-4">
+                <h1 class="h2 text-danger font-weight-bold mb-4">Payment Failed</h1>
+                <p class="lead text-muted mb-4">We encountered an issue while processing your payment. Please try again.</p>
+                <p class="lead text-muted mb-4">If the issue persists, please contact our customer support team.</p>
+                <a href="/retryPayment/<%= locals.orderId %>" class="btn btn-danger btn-lg mb-2 me-2" style="background-color: brown;" >Retry Payment</a>
+                <a href="/shop" class="btn btn-secondary btn-lg mb-2">Continue Shopping</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<div id="preloader-active">
+    <div class="preloader d-flex align-items-center justify-content-center">
+        <div class="preloader-inner position-relative">
+            <div class="text-center">
+                <h5 class="mb-5">Now Loading</h5>
+                <div class="loader">
+                    <div class="bar bar1"></div>
+                    <div class="bar bar2"></div>
+                    <div class="bar bar3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../layout/user_footer.ejs') %>

@@ -1,0 +1,135 @@
+
+<footer class="footer-area footer-style-2 mt-15" style="background-color: #4a90e2; color: #f2f2f2; padding: 40px 0;">
+    <div class="footer-top">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-6">
+                    <div class="footer-widget">
+                        <div class="footer-logo">
+                            <h1 style="color: #f5a623; font-family: 'Press Start 2P', serif; margin-bottom: 20px;">GAMBIT</h1>
+                        </div>
+                        <p>Gambit - Your best source for high quality products.</p>
+                        <div class="footer-social">
+                            <a href="#"><i class="bi bi-facebook" style="color: #f5a623;"></i></a>
+                            <a href="#"><i class="bi bi-twitter" style="color: #f5a623;"></i></a>
+                            <a href="#"><i class="bi bi-instagram" style="color: #f5a623;"></i></a>
+                            <a href="#"><i class="bi bi-youtube" style="color: #f5a623;"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="footer-widget">
+                        <h5>Contact Us</h5>
+                        <ul>
+                            <li><i class="bi bi-geo-alt"></i> Address Line</li>
+                            <li><i class="bi bi-phone"></i> +123 456 789</li>
+                            <li><i class="bi bi-envelope"></i> info@example.com</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="footer-widget">
+                        <h5>Newsletter</h5>
+                        <p>Subscribe to our newsletter for the latest updates and offers.</p>
+                        <form action="#">
+                            <input type="email" placeholder="Your email" style="margin-bottom: 15px; width: 100%; padding: 8px;">
+                            <button type="submit" style="background-color: #f5a623; color: #f2f2f2; border: none; border-radius: 5px; padding: 10px; font-size: 16px; width: 100%;">Subscribe</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <div class="container">
+            <div class="footer-copy-right text-center">
+                <p>&copy; 2024 Gambit. All Rights Reserved.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- Vendor JS-->
+ 
+<script src="/js/vendor/modernizr-3.6.0.min.js"></script>
+<script src="/js/vendor/jquery-3.6.0.min.js"></script>
+<script src="/js/vendor/jquery-migrate-3.3.0.min.js"></script>
+<script src="/js/vendor/bootstrap.bundle.min.js"></script>
+<script src="/js/plugins/slick.js"></script>
+<script src="/js/plugins/jquery.syotimer.min.js"></script>
+<script src="/js/plugins/wow.js"></script>
+<script src="/js/plugins/jquery-ui.js"></script>
+<script src="/js/plugins/perfect-scrollbar.js"></script>
+<script src="/js/plugins/magnific-popup.js"></script>
+<script src="/js/plugins/select2.min.js"></script>
+<script src="/js/plugins/waypoints.js"></script>
+<script src="/js/plugins/counterup.js"></script>
+<script src="/js/plugins/jquery.countdown.min.js"></script>
+<script src="/js/plugins/images-loaded.js"></script>
+<script src="/js/plugins/isotope.js"></script>
+<script src="/js/plugins/scrollup.js"></script>
+<script src="/js/plugins/jquery.vticker-min.js"></script>
+<script src="/js/plugins/jquery.theia.sticky.js"></script>
+<script src="/js/plugins/jquery.elevatezoom.js"></script>
+<!-- Template  JS -->
+<script src="/js/main.js?v=3.4"></script>
+<script src="/js/shop.js?v=3.4"></script>
+<!-- razorpay -->
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-image-zoom/0.2.4/js-image-zoom.min.js"></script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/elevatezoom-plus@1.1.21/jquery.ez-plus.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+
+</body>
+
+</html>
+
+<script>
+$(document).ready(function() {
+    $("#searchInput").autocomplete({
+        source: async function(request, response) {
+            try {
+                const res = await fetch(`/shop?query=${encodeURIComponent(request.term)}`);
+                const data = await res.json();
+                if (data.success) {
+                    const suggestions = data.suggestions.map(suggestion => ({
+                        label: suggestion.name,
+                        value: suggestion.id
+                    }));
+                    response(suggestions)
+                } else {
+                    response([]);
+                }
+            } catch (err) {
+                console.log(err);
+                response([]);
+            }
+        },
+
+        select: function(event, ui) {
+ 
+            window.location.href = `/product-details/${ui.item.value}`;
+        }
+
+    });
+
+})
+async function search(){
+    try{
+        event.preventDefault()
+        event.stopPropagation()
+        const query = document.getElementById('searchInput').value
+        if(query){
+            window.location.href = `/shop?search=${encodeURIComponent(query)}`
+        }
+    }catch(error){
+        console.error(error);
+    }
+}
+</script>
+
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+<script src="https://code.jquery.com/ui/1.14.0/jquery-ui.js"></script>

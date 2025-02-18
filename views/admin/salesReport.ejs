@@ -1,0 +1,144 @@
+<%- include('../layout/admin_header.ejs') %>
+<body>
+    <div class="container p-4">
+        <h2 class="text-xl font-bold mb-4">Generate Sales Report</h2>
+
+        <!-- Period Buttons -->
+        <div class="mb-4">
+            <button id="btnDay" class="btn btn-dark me-2">Today</button>
+            <button id="btnWeek" class="btn btn-dark me-2">This Week</button>
+            <button id="btnMonth" class="btn btn-dark me-2">This Month</button>
+        </div>
+
+        <!-- Custom Date Range -->
+        <div class="mb-4">
+            <label for="startDate" class="form-label">Start Date:</label>
+            <input type="date" id="startDate" class="form-control">
+            <label for="endDate" class="form-label mt-2">End Date:</label>
+            <input type="date" id="endDate" class="form-control">
+            <button id="btnCustomRange" class="btn btn-dark mt-2">Fetch Custom Date Range</button>
+        </div>
+
+        <!-- Report Summary -->
+        <div class="mb-4">
+            <h3>Report Summary</h3>
+            <p><strong>Total Sales Count:</strong> <span id="totalSalesCount">0</span></p>
+            <p><strong>Total Order Amount:</strong> <span id="totalOrderAmount">0.00</span></p>
+            <p><strong>Total Discount:</strong> <span id="totalDiscount">0.00</span></p>
+        </div>
+
+        <!-- Sales Details Table -->
+        <div class="mb-4">
+            <h3>Sales Details</h3>
+            <table class="table table-striped" id="salesTable">
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Order Amount</th>
+                        <th>Amount</th>
+                        <th>Coupon Discount</th>
+                        <th>Discount On MRP</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data will be inserted here dynamically -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Download Report -->
+        <div class="mb-4">
+            <label for="format" class="form-label">Format:</label>
+            <select id="format" class="form-select">
+                <option value="pdf">PDF</option>
+                <option value="xlsx">Excel</option>
+            </select>
+            <button id="btnDownload" class="btn btn-dark mt-2">Download Report</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnDay = document.getElementById('btnDay');
+            const btnWeek = document.getElementById('btnWeek');
+            const btnMonth = document.getElementById('btnMonth');
+            const btnCustomRange = document.getElementById('btnCustomRange');
+            const btnDownload = document.getElementById('btnDownload');
+            const startDateInput = document.getElementById('startDate');
+            const endDateInput = document.getElementById('endDate');
+            const formatSelect = document.getElementById('format');
+            
+            let currentPeriod = 'day'; 
+    
+            async function fetchReport(period, startDate = '', endDate = '') {
+                try {
+                    const response = await fetch(`/admin/generate-report?period=${period}&startDate=${startDate}&endDate=${endDate}`);
+                    const data = await response.json();
+                    updateReportDisplay(data);
+                } catch (error) {
+                    console.error('Error fetching report:', error);
+                }
+            }
+            
+            function updateReportDisplay(data) {
+                document.getElementById('totalSalesCount').textContent = data.overallSalesCount;
+                document.getElementById('totalOrderAmount').textContent = `₹${data.overallOrderAmount.toFixed(2)}`;
+                document.getElementById('totalDiscount').textContent = `₹${data.overallDiscount.toFixed(2)}`;
+            
+                const tableBody = document.querySelector('#salesTable tbody');
+                tableBody.innerHTML = '';
+                data.orders.forEach(order => {
+                    const row = `
+                        <tr>
+                            <td>${order._id}</td>
+                            <td>₹${order.totalAmount.toFixed(2)}</td>
+                            <td>₹${order.totalAmount}</td>
+                            <td>₹${order.couponDiscount.toFixed(2)}</td>
+                            <td>₹${order.offerDiscount.toFixed(2)}</td>
+                            <td>${new Date(order.createdAt).toLocaleDateString()}</td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += row;
+                });
+            }
+    
+            btnDay.addEventListener('click', () => {
+                currentPeriod = 'day';
+                fetchReport(currentPeriod);
+            });
+            
+            btnWeek.addEventListener('click', () => {
+                currentPeriod = 'week';
+                fetchReport(currentPeriod);
+            });
+            
+            btnMonth.addEventListener('click', () => {
+                currentPeriod = 'month';
+                fetchReport(currentPeriod);
+            });
+            
+            btnCustomRange.addEventListener('click', () => {
+                currentPeriod = 'custom';
+                fetchReport(currentPeriod, startDateInput.value, endDateInput.value);
+            });
+            
+            btnDownload.addEventListener('click', async () => {
+                const format = formatSelect.value;
+                let query = `?format=${format}&period=${currentPeriod}`;
+                
+                if (currentPeriod === 'custom') {
+                    const startDate = startDateInput.value;
+                    const endDate = endDateInput.value;
+                    query += `&startDate=${startDate}&endDate=${endDate}`;
+                }
+    
+                window.location.href = `/admin/download-report${query}`;
+            });
+    
+            fetchReport(currentPeriod);
+        });
+    </script>
+    
+
+    <%- include('../layout/admin_footer.ejs') %>

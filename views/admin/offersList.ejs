@@ -1,0 +1,192 @@
+<%- include('../layout/admin_header.ejs') %>
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Offers Overview</h2>
+            <a href="/admin/dashboard">Dashboard </a><span>> Offers Overview</span>
+        </div>
+        <div>
+            <a href="/admin/offers/addOfferpage" class="btn btn-primary btn-sm rounded">Add Offer</a>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <!-- Add the selection dropdown -->
+            <div class="btn-group mb-4" role="group" aria-label="Offers Selection">
+                <button type="button" class="btn btn-secondary" id="productOffersTab">Product Offers</button>
+                <button type="button" class="btn btn-secondary" id="categoryOffersTab">Category Offers</button>
+            </div>
+
+            <!-- Section for product offers -->
+            <div id="productOffersSection" class="offer-section">
+                <h3>Product Offers</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Offer</th>
+                            <th>OfferName</th>
+                            <th>Startdate</th>
+                            <th>Enddate</th>
+                            <th>Discount</th>
+                            <th>Status</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% productOffers?.forEach(offer => { %>
+                            <tr>
+                                <td><%= offer?.targetOfferId?.product_name %></td>
+                                <td><%= offer?.name %></td>
+                                <td><%= offer?.startDate.toISOString().slice(0, 10) %></td>
+                                <td><%= offer?.endDate?.toISOString().slice(0, 10) %></td>
+                                <td><%= offer?.discountPercentage %>%</td>
+                                <td><button id="activateOrDeactivateButton<%= offer._id %>" onclick="activateOrInactivate('<%= offer._id %>', 'products')" class="btn <%= !offer.status ? 'btn-success' : 'btn-danger' %>"><%= !offer.status ? 'Activate' : 'Deactivate' %></button></td>
+                                
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Section for category offers -->
+            <div id="categoryOffersSection" class="offer-section" style="display: none;">
+                <h3>Category Offers</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Offer</th>
+                            <th>OfferName</th>
+                            <th>Startdate</th>
+                            <th>Enddate</th>
+                            <th>Discount</th>
+                            <th>Status</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% categoryOffers?.forEach(offer => { %>
+                            <tr>
+                                <td><%= offer?.targetOfferId?.name %></td>
+                                <td><%= offer?.name %></td>
+                                <td><%= offer?.startDate.toISOString().slice(0, 10) %></td>
+                                <td><%= offer?.endDate?.toISOString().slice(0, 10) %></td>
+                                <td><%= offer?.discountPercentage %>%</td>
+                                <td><button id="activateOrDeactivateButton<%= offer._id %>" onclick="activateOrInactivate('<%= offer._id %>', 'categories')" class="btn <%= !offer.status ? 'btn-success' : 'btn-danger' %>"><%= !offer.status ? 'Activate' : 'Deactivate' %></button></td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    document.getElementById('productOffersTab').addEventListener('click', () => {
+        document.getElementById('productOffersSection').style.display = 'block';
+        document.getElementById('categoryOffersSection').style.display = 'none';
+    });
+
+    document.getElementById('categoryOffersTab').addEventListener('click', () => {
+        document.getElementById('productOffersSection').style.display = 'none';
+        document.getElementById('categoryOffersSection').style.display = 'block';
+    });
+
+    const activateOrInactivate = (id, type) => {
+        const button = document.getElementById(`activateOrDeactivateButton${id}`);
+        
+        const isBlocking = button.classList.contains('btn-success'); 
+        const newStatus = !isBlocking; 
+    
+        Swal.fire({
+            title: `Are you sure you want to ${isBlocking ? 'Deactivate' : 'Activate'} this ${type} Offer?`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: 'grey',
+            confirmButtonText: `Yes, ${isBlocking ? 'Deactivate' : 'Activate'}`,
+            customClass: {
+                confirmButton: 'swal1-confirm',
+                cancelButton: 'swal1-cancel'
+            },
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/admin/offers/offerStatusChange`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id, status: newStatus }) 
+                }).then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                }).then(data => {
+                    if (data.success) {
+                       
+                        if (data.newStatus) {
+                            
+                            button.classList.remove('btn-success');
+                            button.classList.add('btn-danger');
+                            button.textContent = 'Deactivate';
+                            Swal.fire({
+                                text: `This ${type} offer is now active.`,
+                                icon: 'success',
+                                toast: true,
+                                position: 'top-right',
+                                showConfirmButton: false,
+                                timerProgressBar: true,
+                                timer: 3000,
+                            });
+                        } else {
+                            console.log(newStatus)
+                            button.classList.remove('btn-danger');
+                            button.classList.add('btn-success');
+                            button.textContent = 'Activate';
+                            Swal.fire({
+                                text: `This ${type} offer is no longer available.`,
+                                icon: 'success',
+                                toast: true,
+                                position: 'top-right',
+                                showConfirmButton: false,
+                                timerProgressBar: true,
+                                timer: 3000,
+                            });
+                        }
+                    } else {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: data.message || 'There was a problem updating the offer status.',
+                            icon: 'error',
+                            toast: true,
+                            position: 'top-right',
+                            showConfirmButton: false,
+                            timerProgressBar: true,
+                            timer: 3000,
+                        });
+                    }
+                }).catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'There was a problem blocking/unblocking the offer.',
+                        icon: 'error',
+                        toast: true,
+                        position: 'top-right',
+                        showConfirmButton: false,
+                        timerProgressBar: true,
+                        timer: 3000,
+                    });
+                });
+            }
+        });
+    };
+    
+    
+    
+</script>
+
+<%- include('../layout/admin_footer.ejs') %>
