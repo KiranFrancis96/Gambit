@@ -249,9 +249,9 @@ const googleAuth = async function(req, res) {
         // console.log('Full req.user object:', JSON.stringify(req.user, null, 2));
         // console.log(req.user);
         
-        const { id, displayName, emails, phoneNumbers } = req.user;
+        const { id, displayName, emails } = req.user;
         const email = emails && emails.length > 0 ? emails[0].value : null;
-        const mobile = phoneNumbers && phoneNumbers.length > 0 ? phoneNumbers[0].value : null;
+        // const mobile = phoneNumbers && phoneNumbers.length > 0 ? phoneNumbers[0].value : null;
         
         // console.log('ID:', id);
         // console.log('Display Name:', displayName);

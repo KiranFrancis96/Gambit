@@ -6,24 +6,23 @@ require('dotenv').config();
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "http://www.gambit.fun/auth/google/callback",
-    scope: ['profile', 'email', 'https://www.googleapis.com/auth/user.phonenumbers.read']
+    callbackURL: `${process.env.NODE_ENV==="development"?"http://localhost:4000":"https://gamersgambit.shop"}/auth/google/callback`,
 },
 async function (accessToken, refreshToken, profile, done) {
     try {
-        const oauth2Client = new google.auth.OAuth2();
-        oauth2Client.setCredentials({ access_token: accessToken });
+        // const oauth2Client = new google.auth.OAuth2();
+        // oauth2Client.setCredentials({ access_token: accessToken });
 
-        const people = google.people({ version: 'v1', auth: oauth2Client });
-        const res = await people.people.get({
-            resourceName: 'people/me',
-            personFields: 'phoneNumbers',
-        });
+        // const people = google.people({ version: 'v1', auth: oauth2Client });
+        // const res = await people.people.get({
+        //     resourceName: 'people/me',
+        //     personFields: 'phoneNumbers',
+        // });
 
-        console.log('Google People API response:', JSON.stringify(res.data, null, 2));
+        // console.log('Google People API response:', JSON.stringify(res.data, null, 2));
 
-        // Add the phone numbers to the profile object
-        profile.phoneNumbers = res.data.phoneNumbers || [];
+        // // Add the phone numbers to the profile object
+        // profile.phoneNumbers = res.data.phoneNumbers || [];
 
         return done(null, profile);
     } catch (error) {

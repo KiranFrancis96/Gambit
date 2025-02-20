@@ -92,7 +92,7 @@ userRoute.delete('/wishlist/:change',userAuth.isLoggedin,userController.addOrRem
 
 
 
-userRoute.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email','https://www.googleapis.com/auth/user.phonenumbers.read'] }))
+userRoute.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }))
 userRoute.get('/auth/google/callback',passport.authenticate('google',{successRedirect:"/auth/protected",failureRedirect:"/"}))  
 userRoute.get('/auth/protected',userController.googleAuth)
 
