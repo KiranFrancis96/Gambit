@@ -280,6 +280,7 @@
           <% }else {%>
             <div class="row">
               <% coupons.forEach(coupon => { %>
+                <% console.log("COUPONSSSSS",coupon) %>
                 <%if(!coupon?.usedBy?.includes(cartdata?.user?._id)) {%>
                   <div class="col-md-6 mb-3">
                     <div class="card h-100 shadow-sm border-0">
@@ -320,7 +321,9 @@
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
     let couponSelected;
-    let selectAddressId
+    let selectAddressId;
+    let data;
+    let flag=false
     let paymentStatus = '<%= cartdata.paymentStatus %>'
    function selectAddress(addressId) {
        selectAddressId = addressId
@@ -354,6 +357,7 @@
             });
     
             const data = await response.json();
+            if(data){flag=false}
             handleCouponResponse(data, 'removed');
         } catch (error) {
             handleError('removing', error);
@@ -370,12 +374,15 @@
                 body: JSON.stringify({ coupon, userId,orderId })
             });
     
-            const data = await response.json();
+              data = await response.json();
+              if(data){flag = true}
             handleCouponResponse(data, 'applied');
         } catch (error) {
             handleError('applying', error);
         }
     };
+
+    
     
     const handleCouponResponse = (data, action) => {
         if (data.success) {
@@ -448,7 +455,15 @@
       
     async function razorPaycheck() {
         const userId = '<%= cartdata.user._id %>'
-        const amount = parseInt('<%= summary.total %>')
+        // const amount = parseInt('<= summary.total %>')
+        // console.log("DzAWIATTETET",data.summary.total)
+        console.log("COUPONNNNDISCOUNT",'<%=summary.couponDiscount>0%>')
+        totalAmount = data?.summary?.total
+        console.log("SUMMARYWITHOUTCOUPON",'<%=summary.total%>')
+        console.log("SUMMARY.TOTAL",totalAmount)
+        const amount = flag ? totalAmount : parseInt('<%=summary.total%>')
+        console.log("AMMMMMM",amount)
+        
         try {
             Swal.fire({
                 title: 'Processing Payment...',
@@ -562,7 +577,7 @@
             Swal.close();
     
         } catch (error) {
-            console.error('Error:', error);
+            console.log('Error:', error);
             Swal.fire('Error!', error.message || 'An error occurred while adding money.', 'error');
         }
     }

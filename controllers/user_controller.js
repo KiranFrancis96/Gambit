@@ -1909,6 +1909,8 @@ const downloadInvoice = async (req, res) => {
 const createOrder = async (req, res) => {
     try {
       const { userId, amount } = req.body;
+
+      console.log("AMOUNTTTTTTTTTT",amount)
       if (!userId || !amount) {
         return res.status(400).json({ success: false, message: 'Please provide userId and amount.' });
       }
@@ -1916,7 +1918,7 @@ const createOrder = async (req, res) => {
       const key =  process.env.RZP_key_ID
       
       const order = await Razorpay.createOrder(amount, `receipt_${userObjectId}`);
-
+      console.log("GGGGGG")
       return res.status(200).json({
         success: true,
         message: 'Wallet money added successfully.',

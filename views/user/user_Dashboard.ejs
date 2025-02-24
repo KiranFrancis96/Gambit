@@ -86,7 +86,7 @@
                                                             <p class="mb-1" style="margin-left: 55px;">Pincode: <%= order.shippingAddress.pincode %></p>
                                                         </div>
                                 
-                                                        <% order.items.forEach(item => { %>
+                                                        <% order.items.forEach((item,index,array) => { %>
                                                             <div class="d-flex mb-3">
                                                                 <div class="flex-shrink-0 me-3" style="width: 50px;">
                                                                     <% if (item.images && item.images.length > 0) { %>
@@ -129,7 +129,7 @@
                                                                             </button>
                                                                         <% } %>
                                 
-                                                                        <% if (canReturn) { %>
+                                                                        <% if (canReturn && index==array.length-1) { %>
                                                                             <button id="returnProductButton<%= item._id %>" class="btn btn-primary btn-sm" 
                                                                                 onclick="returnProduct('<%= item._id %>', '<%= item.product %>', '<%= order._id %>', '<%= item.itemOrderStatus %>')"
                                                                                 <%= isReturnInitiated ? 'disabled' : '' %>>
