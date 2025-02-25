@@ -34,8 +34,8 @@
                 <thead>
                     <tr>
                         <th>Order ID</th>
-                        <th>Order Amount</th>
                         <th>Amount</th>
+                        <th>Amount after Discount</th>
                         <th>Coupon Discount</th>
                         <th>Discount On MRP</th>
                         <th>Date</th>
@@ -92,7 +92,7 @@
                     const row = `
                         <tr>
                             <td>${order._id}</td>
-                            <td>₹${order.totalAmount.toFixed(2)}</td>
+                            <td>₹${order.subTotalAmount.toFixed(2)}</td>
                             <td>₹${order.totalAmount}</td>
                             <td>₹${order.couponDiscount.toFixed(2)}</td>
                             <td>₹${order.offerDiscount.toFixed(2)}</td>

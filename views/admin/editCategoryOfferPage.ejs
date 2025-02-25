@@ -2,7 +2,7 @@
 
 <div class="container mt-5">
     <h1 class="mb-4">Edit Category Offer</h1>
-    <form id="offerForm" action="/admin/categories/editCategoryOffer/<%= category._id %>" method="post">
+    <form id="offerForm" action="/admin/category/editOffer/<%= category._id %>" method="post">
         <span class="text-danger"><%= locals.error %></span>
         <div class="row mb-3">
             <div class="col-md-9">
@@ -58,6 +58,8 @@
         
         let isValid = true;
         const now = new Date();
+        const todayEndTime = new Date()
+        todayEndTime.setHours(23,59,59,999)
         
         // Clear previous errors
         document.querySelectorAll('.error').forEach(e => e.textContent = '');
@@ -71,21 +73,41 @@
     
         // Discount Percentage Validation
         const discountPercentage = parseInt(document.getElementById('discountPercentage').value, 10);
-        if (isNaN(discountPercentage) || discountPercentage < 1 || discountPercentage > 90) {
+
+        if(!discountPercentage){
+          document.getElementById('discountError').textContent = 'Discount percentage is required.';
+          isValid = false;
+       }
+        if (discountPercentage < 1 || discountPercentage > 90) {
             document.getElementById('discountError').textContent = 'Discount percentage must be between 1 and 90.';
             isValid = false;
         }
     
         // Start Date Validation
-        const startDate = new Date(document.getElementById('startDate').value);
-        if (isNaN(startDate.getTime()) || startDate < now) {
+        const startDate = new Date(document.getElementById('startDate').value.trim());
+
+        if (isNaN(startDate.getTime())){
+        document.getElementById('startDateError').textContent = 'Start Date is required';
+        isValid = false;
+        }
+
+        const current = new Date()
+        startDate.setHours(current.getHours(),current.getMinutes(),current.getSeconds(),current.getMilliseconds())
+        if ( startDate < now) {
             document.getElementById('startDateError').textContent = 'Start date cannot be before today.';
             isValid = false;
         }
     
         // Expiry Date Validation
-        const expiryDate = new Date(document.getElementById('expiryDate').value);
-        if (isNaN(expiryDate.getTime()) || expiryDate < now) {
+        const expiryDate = new Date(document.getElementById('expiryDate').value.trim());
+
+        if (isNaN(expiryDate.getTime())){
+        document.getElementById('expiryDateError').textContent = 'Expiry Date is required';
+        isValid = false;
+        }
+
+        expiryDate.setHours(23,59,59,999)
+        if ( expiryDate < todayEndTime) {
             document.getElementById('expiryDateError').textContent = 'Expiry date cannot be before today.';
             isValid = false;
         } else if (expiryDate < startDate) {

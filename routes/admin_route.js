@@ -55,6 +55,7 @@ adminRoute.post('/products/activate-product/:id',admin_session.isLoggedin,produc
 adminRoute.get('/products/addProductOfferPage/:id',admin_session.isLoggedin,product_controller.addProductOfferPage)
 adminRoute.get('/products/editProductOfferPage/:id',admin_session.isLoggedin,product_controller.editProductOfferPage)
 adminRoute.post('/products/addProductOffer/:id',admin_session.isLoggedin,product_controller.addProductOffer)
+adminRoute.post('/products/editProductOffer/:id',admin_session.isLoggedin,product_controller.editProductOffer)
 adminRoute.delete('/products/removeProductOffer/:id',admin_session.isLoggedin,product_controller.removeProductOffer)
 adminRoute.put('/products/changeOfferStatus/:id',admin_session.isLoggedin,product_controller.changeOfferStatus)
 adminRoute.patch('/products/updateOfferPrice/:id',admin_session.isLoggedin,product_controller.updateOfferPrice)
@@ -75,6 +76,7 @@ adminRoute.get('/category/details/:id',admin_session.isLoggedin,categories_contr
 adminRoute.get('/category/addOffer/:id',admin_session.isLoggedin,categories_controller.loadAddCategoryPage)
 adminRoute.post('/category/addOffer/:id',admin_session.isLoggedin,categories_controller.addCategoryOffer)
 adminRoute.get('/category/editOffer/:id',admin_session.isLoggedin,categories_controller.loadEditCategoryOfferPage)
+adminRoute.post('/category/editOffer/:id',admin_session.isLoggedin,categories_controller.editCategoryOffer)
 adminRoute.delete('/categories/removeCategoryOffer/:id',admin_session.isLoggedin,categories_controller.removeCategoryOffer)
 adminRoute.put('/categories/changeCategoryOfferStatus/:id',admin_session.isLoggedin,categories_controller.changeOfferStatus)
 

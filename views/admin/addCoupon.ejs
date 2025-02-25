@@ -94,6 +94,8 @@
     
     form.addEventListener('submit', function(event) {
       let isValid = true;
+      const todayEndTime = new Date()
+      todayEndTime.setHours(23,59,59,999)
 
       // Clear previous errors
       document.querySelectorAll('.error').forEach(error => error.textContent = '');
@@ -142,9 +144,14 @@
       }
 
       // Validate Expiration Date (if provided)
-      const expirationDate = document.getElementById('expirationDate').value.trim();
-      if (expirationDate && new Date(expirationDate) < new Date()) {
-        document.getElementById('expirationDateError').textContent = 'Expiration Date cannot be in the past.';
+      const expirationDate = new Date(document.getElementById('expirationDate').value.trim());
+      if (isNaN(expirationDate.getTime())){
+        document.getElementById('expirationDateError').textContent = 'Expiration Date is required';
+        isValid = false;
+      }
+      expirationDate.setHours(23,59,59,999)
+      if (expirationDate && expirationDate < todayEndTime) {
+        document.getElementById('expirationDateError').textContent = 'Expiration Date cannot be before today end.';
         isValid = false;
       }
 

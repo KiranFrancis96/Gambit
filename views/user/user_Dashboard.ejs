@@ -73,9 +73,9 @@
                                                             <p class="mb-1"><strong>Order Date:</strong> <%= new Date(order.orderDate).toLocaleDateString() %></p>
                                                             <p class="mb-1"><strong>Payment Method:</strong> <%= order.paymentMethod %></p>
                                                         </div>
-                                                        <div id="orderStatus<%= order._id %>" class="text-warning">
-                                                            <strong><%= order.orderStatus.toUpperCase() %></strong>
-                                                        </div>
+                                                        <!-- <div id="orderStatus<= order._id %>" class="text-warning">
+                                                            <strong><= order.orderStatus.toUpperCase() %></strong>
+                                                        </div> -->
                                                     </div>
                                                     <div id="orderDetails-<%= order._id %>" class="collapse">
                                                         <hr>
@@ -98,7 +98,8 @@
                                                                 <div class="flex-grow-1">
                                                                     <p class="mb-1"><strong>Name:</strong> <%= item.productName %></p>
                                                                     <p class="mb-1"><strong>Brand:</strong> <%= item.brandName %></p>
-                                                                    <p class="mb-0"><strong>Price:</strong> Rs <%= item.itemOffer?.offerAmount ? (item.price - item.itemOffer.offerAmount) * item.quantity : item.price * item.quantity %></p>
+                                                                    <p class="mb-1"><strong>Price:</strong> Rs <%= item.price%></p>
+                                                                    <p class="mb-0"><strong>Offer:</strong> Rs <%= item.itemOffer?.offerAmount ? item.itemOffer.offerAmount : 0 %></p>
                                                                     <p class="mb-0"><strong>Quantity:</strong> x <%= item.quantity %></p>
                                                                     <p id="itemOrderStatus<%= item._id %>" class="order-product-status mb-0 text-warning">
                                                                         <strong>Status: <%= item.itemOrderStatus.toUpperCase() %></strong>
@@ -119,8 +120,6 @@
                                                                             <button id="cancelProductButton<%= item._id %>" class="btn btn-sm individualCancel" disabled>
                                                                                 Return
                                                                             </button>
-                                                                        <% } else if (order.paymentMethod === 'COD' && canCancel) { %>
-                                                                            <button disabled class="btn btn-sm individualCancel">Cancel</button> 
                                                                         <% } else if (canCancel) { %>
                                                                             <button id="cancelProductButton<%= item._id %>" class="btn btn-sm individualCancel" 
                                                                                 onclick="cancelOrderItem('<%= item._id %>', '<%= order._id %>', '<%= item.itemOrderStatus %>')"
@@ -129,7 +128,7 @@
                                                                             </button>
                                                                         <% } %>
                                 
-                                                                        <% if (canReturn && index==array.length-1) { %>
+                                                                        <% if (canReturn) { %>
                                                                             <button id="returnProductButton<%= item._id %>" class="btn btn-primary btn-sm" 
                                                                                 onclick="returnProduct('<%= item._id %>', '<%= item.product %>', '<%= order._id %>', '<%= item.itemOrderStatus %>')"
                                                                                 <%= isReturnInitiated ? 'disabled' : '' %>>
@@ -507,7 +506,7 @@
                                               <% if(wallet?.transactions.length>0 && wallet) {%>
                                                 <% wallet.transactions.forEach(transaction => { %>
                                                         <tr>
-                                                            <td><%= transaction.razorpaymentId %></td>
+                                                            <td><%= transaction.orderId %></td>
                                                             <td>₹<%= transaction.amount %></td>
                                                             <td><%= transaction.createdAt.toISOString().split('T')[0] %></td>
                                                             <td><span style="color:<%= transaction.type=='credit'?'green':'red' %> ;"><%= transaction.type %></span></td>
@@ -1360,27 +1359,27 @@
     
                                 // Update order amounts and status
                                 if (data.allOrderCancelled) {
-                                    const cancelOrderButton = document.getElementById(`cancelOrderButton${orderId}`);
-                                    if (cancelOrderButton) {
-                                        cancelOrderButton.disabled = true;
-                                        cancelOrderButton.textContent = "Cancelled";
-                                    }
+                                    // const cancelOrderButton = document.getElementById(`cancelOrderButton${orderId}`);
+                                    // if (cancelOrderButton) {
+                                    //     cancelOrderButton.disabled = true;
+                                    //     cancelOrderButton.textContent = "Cancelled";
+                                    // }
     
                                     const orderStatusElement = document.getElementById(`orderStatus${orderId}`);
                                     if (orderStatusElement) {
                                         orderStatusElement.innerHTML = '<strong>CANCELLED</strong>';
                                     }
     
-                                    const orderProductStatusElements = document.querySelectorAll('.order-product-status');
-                                    orderProductStatusElements.forEach(element => {
-                                        element.innerHTML = '<strong>Status: CANCELLED</strong>';
-                                    });
+                                    // const orderProductStatusElements = document.querySelectorAll('.order-product-status');
+                                    // orderProductStatusElements.forEach(element => {
+                                    //     element.innerHTML = '<strong>Status: CANCELLED</strong>';
+                                    // });
     
-                                    const individualCancelButtons = document.querySelectorAll(".individualCancel");
-                                    individualCancelButtons.forEach(button => {
-                                        button.disabled = true;
-                                        button.textContent = "Cancelled";
-                                    });
+                                    // const individualCancelButtons = document.querySelectorAll(".individualCancel");
+                                    // individualCancelButtons.forEach(button => {
+                                    //     button.disabled = true;
+                                    //     button.textContent = "Cancelled";
+                                    // });
                                 }
     
                                 // Update amounts (assuming data includes updated amounts)

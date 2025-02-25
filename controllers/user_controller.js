@@ -1683,7 +1683,7 @@ const cancelOrderItem = async (req, res) => {
         console.log('validstatus:',validStatuses)
         console.log('itemorderstatus:',itemOrderStatus)
         
-        if ((itemOrderStatus === "pending" || itemOrderStatus === "confirmed") && orderData.paymentMethod != 'COD') {
+        if (itemOrderStatus === "pending" || itemOrderStatus === "confirmed") {
 
             const updateResult = await orderModel.updateOne(
                 { _id: orderId, "items._id": itemId },
@@ -1714,10 +1714,10 @@ const cancelOrderItem = async (req, res) => {
                 itemAmount -= discountAmount;
             }
             itemDetails.itemCouponPropotion = discountAmount
-            orderData.offerDiscount = Math.max(0, orderData.offerDiscount - (itemDetails.itemOffer?.offerAmount*itemDetails.quantity || 0));
-            orderData.subTotalAmount = Math.max(0, orderData.subTotalAmount - (itemDetails.price * itemDetails.quantity));
-            orderData.totalAmount = Math.max(0, orderData.totalAmount - itemAmount);
-            orderData.couponDiscount = Math.max(0, orderData.couponDiscount - discountAmount);
+            // orderData.offerDiscount = Math.max(0, orderData.offerDiscount - (itemDetails.itemOffer?.offerAmount*itemDetails.quantity || 0));
+            // orderData.subTotalAmount = Math.max(0, orderData.subTotalAmount - (itemDetails.price * itemDetails.quantity));
+            // orderData.totalAmount = Math.max(0, orderData.totalAmount - itemAmount);
+            // orderData.couponDiscount = Math.max(0, orderData.couponDiscount - discountAmount);
 
             await orderData.save();
 
@@ -1749,7 +1749,7 @@ const cancelOrderItem = async (req, res) => {
             if (anyNotDelivered && allCancelled) {
                 await orderModel.updateOne(
                     { _id: orderId },
-                    { $set: { orderStatus: "cancelled", paymentStatus: "refunded", totalAmount: 0 } }
+                    { $set: { orderStatus: "cancelled", paymentStatus: "refunded"} }
                 );
             }
 
@@ -1869,6 +1869,7 @@ const downloadInvoice = async (req, res) => {
 
         let totalPrice = 0;
         let offerAmount = 0
+        let grandTotal = 0
         if (!Array.isArray(order.items) || order.items.length === 0) {
             doc.text('No items found in this order.', leftColumnX, yPosition);
         } else {
@@ -1885,12 +1886,25 @@ const downloadInvoice = async (req, res) => {
                 totalPrice = item.price * item.quantity - offerAmount;
                 doc.text(`₹${totalPrice.toFixed(2)}`, leftColumnX + columnWidth * 4, yPosition);
                 yPosition += 20;
+                grandTotal += totalPrice
+                
             });
         }
-        
+        finalTotal = grandTotal - order.couponDiscount
+        const pageWidth = doc.page.width; 
+        const marginRight = 50; 
+
+        const textX = pageWidth - marginRight - 200; 
+
         doc.moveDown(2);
         doc.font('Roboto-Bold').fontSize(14);
-        doc.text(`Total Amount: ₹${totalPrice.toFixed(2)}`, { align: 'right' });
+
+
+        doc.text("Coupon Discount: ", textX, doc.y, { continued: true });
+        doc.text(`-₹${order.couponDiscount.toFixed(2)}`);
+
+
+        doc.text(`Total Amount: ₹${finalTotal.toFixed(2)}`, textX);
 
         doc.end();
     } catch (error) {

@@ -122,7 +122,7 @@ const returnList = async (req,res)=> {
                 }
             ]
         )
-        console.log(returnList);
+        console.log("RETURNNNNNLISTTTT",returnList);
         
         if(!returnList){
             return res.status(404).send(`<h1>No Returns found</h1>`)
@@ -181,16 +181,16 @@ const returnStatusChange = async (req, res) => {
         itemDetails.itemCouponPropotion = discountAmount;
         
       
-        orderData.offerDiscount = Math.max(0, orderData.offerDiscount - (itemDetails.itemOffer?.offerAmount * itemDetails.quantity || 0));
+        // orderData.offerDiscount = Math.max(0, orderData.offerDiscount - (itemDetails.itemOffer?.offerAmount * itemDetails.quantity || 0));
         // console.log('offerDiscount offerDisc - itemOfferAmount',orderData.offerDiscount);
         
-        orderData.subTotalAmount = Math.max(0, orderData.subTotalAmount - (itemDetails.price * itemDetails.quantity));
+        // orderData.subTotalAmount = Math.max(0, orderData.subTotalAmount - (itemDetails.price * itemDetails.quantity));
         // console.log('subtotal subtotal - price x quantty',orderData.subTotalAmount);
         
-        orderData.totalAmount = Math.max(0, orderData.totalAmount - itemAmount);
+        // orderData.totalAmount = Math.max(0, orderData.totalAmount - itemAmount);
         // console.log('totalAmount totalAmount - itemAmount',orderData.totalAmount);
         
-        orderData.couponDiscount = Math.max(0, orderData.couponDiscount - discountAmount);
+        // orderData.couponDiscount = Math.max(0, orderData.couponDiscount - discountAmount);
         // console.log('couponDiscount- discoun Amount',orderData.couponDiscount);
                 
 

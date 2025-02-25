@@ -48,6 +48,9 @@
         
         let isValid = true;
         const now = new Date();
+        const todayEndTime = new Date()
+        todayEndTime.setHours(23,59,59,999)
+        
         
         // Clear previous errors
         document.querySelectorAll('.error').forEach(e => e.textContent = '');
@@ -60,23 +63,46 @@
         }
 
         // Discount Percentage Validation
-        const discountPercentage = parseInt(document.getElementById('discountPercentage').value, 10);
-        if (isNaN(discountPercentage) || discountPercentage < 1 || discountPercentage > 90) {
+        const discountPercentage = parseInt(document.getElementById('discountPercentage').value.trim(), 10);
+       if(!discountPercentage){
+          document.getElementById('discountError').textContent = 'Discount percentage is required.';
+          isValid = false;
+       }
+
+        if ( discountPercentage < 1 || discountPercentage > 90) {
             document.getElementById('discountError').textContent = 'Discount percentage must be between 1 and 90.';
             isValid = false;
         }
 
         // Start Date Validation
-        const startDate = new Date(document.getElementById('startDate').value);
-        if (isNaN(startDate.getTime()) || startDate < now) {
-            document.getElementById('startDateError').textContent = 'Start date cannot be before today.';
+        const startDate = new Date(document.getElementById('startDate').value.trim());
+
+        if (isNaN(startDate.getTime())){
+        document.getElementById('startDateError').textContent = 'Start Date is required';
+        isValid = false;
+        }
+
+        const current = new Date()
+        startDate.setHours(current.getHours(),current.getMinutes(),current.getSeconds(),current.getMilliseconds())
+       
+        
+
+        if ( startDate < now) {
+            document.getElementById('startDateError').textContent = 'Start date cannot be before current time.';
             isValid = false;
         }
 
         // Expiry Date Validation
-        const expiryDate = new Date(document.getElementById('expiryDate').value);
-        if (isNaN(expiryDate.getTime()) || expiryDate < now) {
-            document.getElementById('expiryDateError').textContent = 'Expiry date cannot be before today.';
+        const expiryDate = new Date(document.getElementById('expiryDate').value.trim());
+
+        if (isNaN(expiryDate.getTime())){
+        document.getElementById('expiryDateError').textContent = 'Expiry Date is required';
+        isValid = false;
+        }
+
+        expiryDate.setHours(23,59,59,999)
+        if (expiryDate < todayEndTime) {
+            document.getElementById('expiryDateError').textContent = 'Expiry date cannot be before end of today.';
             isValid = false;
         } else if (expiryDate < startDate) {
             document.getElementById('expiryDateError').textContent = 'Expiry date cannot be before the start date.';

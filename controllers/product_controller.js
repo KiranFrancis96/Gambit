@@ -236,6 +236,35 @@ const addProductOffer = async(req,res)=>{
     }
 }
 
+const editProductOffer = async(req,res)=>{
+    try {
+        const { name,discountPercentage,startDate,expiryDate,description } = req.body
+        const product = await Products.findById(req.params.id)
+       
+        
+        const discountAmount = Math.ceil( product.product_sale_price * discountPercentage/100 ) 
+        
+        const offer = {
+            name,
+            discountPercentage,
+            startDate,
+            expiryDate,
+            description,
+            discountAmount
+        }
+
+        product.offer = offer
+        product.offerType = 'product'
+        product.offerPrice = product.product_sale_price - discountAmount
+        await product.save()
+        return res.redirect(`/admin/products/productdetail/${product._id}`)        
+        
+    } catch (error) {
+        console.log(error.message);
+        return res.redirect('/admin/500')
+    }
+}
+
 const editProductOfferPage = async(req,res)=>{
     try {
         const product = await Products.findById(req.params.id)
@@ -358,6 +387,7 @@ module.exports = {
     addProductOfferPage,
     addProductOffer,
     editProductOfferPage,
+    editProductOffer,
     removeProductOffer,
     changeOfferStatus,
     updateOfferPrice,

@@ -159,6 +159,42 @@ const loadEditCategoryOfferPage  = async(req,res)=>{
     }
 }
 
+const editCategoryOffer = async(req,res)=>{
+    try{
+        const { name,discountPercentage,startDate,expiryDate,description } = req.body
+        const category = await Category.findById(req.params.id)
+        if(!category || !category.isListed ){
+            return res.redirect('/admin/404')
+        }
+        
+        const offer = {
+            name,
+            discountPercentage,
+            startDate,
+            expiryDate,
+            description
+        }
+        const products = await Products.find({product_category:req.params.id}).populate('product_category')
+        if(!products || products.lenth==0){
+            console.log('no products found');
+        }
+
+        for (const product of products) {
+            product.offerPrice = product.product_sale_price - Math.ceil(product.product_sale_price * discountPercentage / 100);
+            product.offerType = 'category'
+            await product.save();
+        }
+        
+        category.offer = offer
+        await category.save()
+        return res.status(200).redirect(`/admin/category/details/${req.params.id}`)
+
+    }catch(error){
+        console.log(error.message)
+        return res.redirect('/admin/500')
+    }
+}
+
 const removeCategoryOffer = async(req,res)=>{
     try {
         const category  = await Category.findById(req.params.id)
@@ -239,6 +275,7 @@ module.exports={
     loadAddCategoryPage,
     addCategoryOffer,
     loadEditCategoryOfferPage,
+    editCategoryOffer,
     removeCategoryOffer,
     changeOfferStatus
 }

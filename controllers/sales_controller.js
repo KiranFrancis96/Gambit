@@ -40,7 +40,7 @@ const downloadReport = async (req, res) => {
                 { header: 'Total Amount', key: 'totalAmount', width: 20 },
                 { header: 'Coupon Discount', key: 'couponDiscount', width: 20 },
                 { header: 'Offer Discount', key: 'offerDiscount', width: 25 },
-                { header: 'Order Status', key: 'orderStatus', width: 20 },
+                // { header: 'Order Status', key: 'orderStatus', width: 20 },
             ];
 
             reportData.orders.forEach((order) => {
@@ -51,7 +51,7 @@ const downloadReport = async (req, res) => {
                     totalAmount: order.totalAmount,
                     couponDiscount: order.couponDiscount,
                     offerDiscount: order.offerDiscount,
-                    orderStatus: order.orderStatus
+                    // orderStatus: order.orderStatus
                 });
             });
             // console.log('working')
@@ -95,7 +95,7 @@ const downloadReport = async (req, res) => {
             doc.text('Total Amount', tableLeft + columnWidth*2 , tableTop);
             doc.text('Coupon Discount', tableLeft + columnWidth* 3 + 20 , tableTop);
             doc.text('Offer Discount', tableLeft + columnWidth *4 + 60 , tableTop);
-            doc.text('Order Status',tableLeft + columnWidth *5 +70 , tableTop);
+            // doc.text('Order Status',tableLeft + columnWidth *5 +70 , tableTop);
 
             doc.font('Roboto-Light');
             let yPosition = tableTop + 20;
@@ -106,10 +106,10 @@ const downloadReport = async (req, res) => {
                 }
                 doc.text(order._id.toString().split('').splice(0,10).join(''), tableLeft, yPosition);
                 doc.text(format(typeof(order.createdAt)=='object' ? order.createdAt : parseISO(order.createdAt), 'yyyy-MM-dd'), tableLeft + columnWidth, yPosition);
-                doc.text(`₹${order.totalAmount.toFixed(2)}`, tableLeft + columnWidth*2+10 , yPosition);
+                doc.text(`₹${order.subTotalAmount.toFixed(2)}`, tableLeft + columnWidth*2+10 , yPosition);
                 doc.text(`₹${order.couponDiscount.toFixed(2)}`, tableLeft + columnWidth * 3+40, yPosition);
                 doc.text(`₹${order.offerDiscount.toFixed(2)}`, tableLeft + columnWidth * 4 + 60, yPosition);
-                doc.text(`${order.orderStatus}`,tableLeft+columnWidth*5 + 90,yPosition)
+                // doc.text(`${order.orderStatus}`,tableLeft+columnWidth*5 + 90,yPosition)
                 yPosition += 20;
             });
 
@@ -150,7 +150,7 @@ const getSalesReport = async (startDate='', endDate='', period) => {
     });
 
     const overallSalesCount = orders.length;
-    const overallOrderAmount = orders.reduce((acc, order) => acc + order.totalAmount, 0);
+    const overallOrderAmount = orders.reduce((acc, order) => acc + order.subTotalAmount, 0);
     const overallDiscount = orders.reduce((acc, order) => acc + order.couponDiscount + order.offerDiscount, 0);
 
     return {
