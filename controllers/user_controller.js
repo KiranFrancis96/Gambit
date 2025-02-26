@@ -3,6 +3,7 @@ const User = require('../model/user_schema')
 const bcrypt = require('bcrypt')
 const PDFDocument = require('pdfkit')
 const {format, parseISO, formatDate} = require('date-fns');
+const path = require('path');
 
 const Products = require('../model/product_schema')
 const Category = require('../model/category_schema')
@@ -1814,10 +1815,13 @@ const downloadInvoice = async (req, res) => {
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'attachment; filename=Invoice.pdf');
 
-        doc.registerFont('Roboto-Bold', `G:\\E-commerce\\E-commerce\\E-commerce\\public\\fonts\\Roboto\\Roboto-Bold.ttf`);
-        doc.registerFont('Roboto-MediumItalic', `G:\\E-commerce\\E-commerce\\E-commerce\\public\\fonts\\Roboto\\Roboto-MediumItalic.ttf`);
-        doc.registerFont('Roboto-Regular', `G:\\E-commerce\\E-commerce\\E-commerce\\public\\fonts\\Roboto\\Roboto-Regular.ttf`);
-
+        const fontPathBold = path.join(__dirname, '../public/fonts/Roboto/Roboto-Bold.ttf');
+        const fontPathItalic = path.join(__dirname, '../public/fonts/Roboto/Roboto-MediumItalic.ttf');
+        const fontPathRegular = path.join(__dirname, '../public/fonts/Roboto/Roboto-Regular.ttf');
+        
+        doc.registerFont('Roboto-Bold', fontPathBold);
+        doc.registerFont('Roboto-MediumItalic', fontPathItalic);
+        doc.registerFont('Roboto-Regular', fontPathRegular);
         doc.pipe(res);
 
         doc.font('Roboto-Bold').fontSize(24).text('Invoice', { align: 'center' }).moveDown(0.5);
